@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { Box, Flex, Tabs, TabList, Tab, Heading, FormControl, FormLabel, Input, InputGroup, InputRightElement, Button, Link, Text } from '@chakra-ui/react'
+import { Box, Flex, Tabs, TabList, Tab, Heading, FormControl, FormLabel, Input, InputGroup, InputRightElement, Button, Link, Text, Image } from '@chakra-ui/react'
+import logo from '../assets/images/logo.svg'
+import fondoPanel from '../assets/images/FondoLogin.jpg'
 
 export default function LoginPage(){
   const { login, register, loading } = useAuth()
@@ -37,6 +39,7 @@ export default function LoginPage(){
       {/* Lado izquierdo: formulario */}
       <Flex flex="1.1" align="center" justify="center" p={{ base: 6, md: 12 }} bg="white">
         <Box w="full" maxW="520px">
+          <Image src={logo} alt="Logo" boxSize={{ base: '120px', md: '140px' }} mb={4} />
           <Tabs index={mode==='login'?0:1} onChange={(i)=>setMode(i===0?'login':'register')} variant="soft-rounded" colorScheme="brand" mb={4}>
             <TabList>
               <Tab>Iniciar Sesión</Tab>
@@ -84,18 +87,21 @@ export default function LoginPage(){
         </Box>
       </Flex>
 
-      {/* Lado derecho: panel visual */}
-      <Flex flex="0.9" bgGradient="linear(to-b, brand.50, #e7efe3)" display={{ base:'none', md:'flex' }} align="center" justify="center" position="relative">
-        <Box w="min(520px,88%)" h="min(380px,72%)" borderWidth="1px" borderStyle="dashed" borderColor="brand.200" borderRadius="xl" bg="#e3ebdf" display="grid" placeItems="center" color="brand.700">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <rect x="3" y="5" width="18" height="14" rx="2" ry="2"></rect>
-            <circle cx="8" cy="10" r="2"></circle>
-            <path d="M21 19l-6-6-4 4-2-2-5 5"></path>
-          </svg>
-        </Box>
-        <Box position="absolute" left="10" right="10" bottom="9" color="gray.700">
-          <Text fontWeight="semibold">"Donde florecen las flores, hay esperanza."</Text>
-          <Text fontSize="sm" color="gray.500">— Lady Bird Johnson</Text>
+      {/* Lado derecho: panel visual a pantalla completa */}
+      <Flex
+        flex="0.9"
+        display={{ base:'none', md:'flex' }}
+        align="center"
+        justify="center"
+        position="relative"
+        bgImage={`url(${fondoPanel})`}
+        bgSize="cover"
+        bgPosition="center"
+        bgRepeat="no-repeat"
+      >
+        <Box position="absolute" left="10" right="10" bottom="9" color="white" textShadow="0 1px 2px rgba(0,0,0,0.5)">
+          <Text fontWeight="semibold">"“Llega a ser quien eres."</Text>
+          <Text fontSize="sm" color="gray.200">— Nietzsche</Text>
         </Box>
       </Flex>
     </Flex>
