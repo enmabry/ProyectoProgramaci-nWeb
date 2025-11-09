@@ -33,7 +33,7 @@ export default function NavbarGlass(){
             <Link className="nav-link" to="/catalog">Tienda</Link>
             {!isAdmin && (
               <>
-                <Link className="nav-link" to="#">Sobre Nosotros</Link>
+                <Link className="nav-link" to="/about">Sobre Nosotros</Link>
               </>
             )}
             {isAdmin && (

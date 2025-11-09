@@ -8,6 +8,7 @@ import CartPage from './pages/CartPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import AdminPage from './pages/AdminPage'
+import AboutPage from './pages/AboutPage'
 import { useAuth } from './context/AuthContext'
 
 function ProtectedRoute({ children }) {
@@ -60,6 +61,7 @@ export default function App(){
       <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       <Route path="/catalog" element={<PublicAuthRoute><CatalogPage /></PublicAuthRoute>} />
       <Route path="/product/:slug" element={<PublicAuthRoute><ProductDetailPage /></PublicAuthRoute>} />
+  <Route path="/about" element={<PublicAuthRoute><AboutPage /></PublicAuthRoute>} />
       <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
       <Route path="/forgot" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
       <Route path="/reset" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
