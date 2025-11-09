@@ -230,3 +230,6 @@
 .nav-link:hover:after {
     width: 100%
 }
+
+.brand-link{ text-decoration:none; color:inherit; display:inline-flex; align-items:center }
+.brand-link:focus{ outline:none; box-shadow:0 0 0 2px rgba(60,129,87,.35); border-radius:6px }

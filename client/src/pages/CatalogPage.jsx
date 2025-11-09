@@ -1,6 +1,15 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { Box, Container, Flex, Heading, SimpleGrid, Select, Input, Button, Slider, SliderTrack, SliderFilledTrack, SliderThumb, Text, Checkbox, CheckboxGroup, Stack, Skeleton } from '@chakra-ui/react'
+import NavbarGlass from '../components/NavbarGlass'
 import '../styles/catalog.css'
+
+function formatCurrency(value){
+  try {
+    return new Intl.NumberFormat('es-CO', { style:'currency', currency:'COP', maximumFractionDigits:0 }).format(value || 0)
+  } catch {
+    return `$${(value||0).toLocaleString('es-CO')}`
+  }
+}
 
 function ProductTile({ p }){
   return (
@@ -12,7 +21,7 @@ function ProductTile({ p }){
       </Box>
       <Box className="catalog-card__body">
         <Heading as="h3" className="catalog-card__title" title={p.name}>{p.name}</Heading>
-        <Text className="catalog-card__price">€{p.price?.toFixed(2)}</Text>
+        <Text className="catalog-card__price">{formatCurrency(p.price)}</Text>
         <Button size="sm" w="full" mt={2}>Añadir</Button>
       </Box>
     </Box>
@@ -27,7 +36,7 @@ export default function CatalogPage(){
   const [search,setSearch] = useState('')
   const [sort,setSort] = useState('newest')
   const [categories,setCategories] = useState([])
-  const [priceMax,setPriceMax] = useState(200)
+  const [priceMax,setPriceMax] = useState(200000)
   const [page,setPage] = useState(1)
   const pageSize = 12
 
@@ -62,7 +71,9 @@ export default function CatalogPage(){
   useEffect(()=>{ if(page>totalPages) setPage(1) },[totalPages,page])
 
   return (
-    <Box py={10}>
+    <Box>
+      <NavbarGlass />
+      <Box pt={{ base: '120px', md: '130px' }} pb={10} className="catalog-page-wrapper">
       <Container maxW="7xl">
         <Heading mb={6} size="lg">Catálogo</Heading>
         <Flex gap={8} align="flex-start" direction={{ base:'column', md:'row' }}>
@@ -93,13 +104,13 @@ export default function CatalogPage(){
               </CheckboxGroup>
             </Box>
             <Box mb={6}>
-              <Text mb={2} className="filter-label">Precio máximo: €{priceMax}</Text>
-              <Slider aria-label='precio-max' min={0} max={500} step={5} value={priceMax} onChange={v=>setPriceMax(v)}>
+              <Text mb={2} className="filter-label">Precio máximo: {formatCurrency(priceMax)}</Text>
+              <Slider aria-label='precio-max' min={0} max={200000} step={5000} value={priceMax} onChange={v=>setPriceMax(v)}>
                 <SliderTrack><SliderFilledTrack bg='brand.500' /></SliderTrack>
                 <SliderThumb boxSize={5} />
               </Slider>
             </Box>
-            <Button size="sm" variant="outline" onClick={()=>{setSearch('');setCategories([]);setPriceMax(200);setSort('newest');setPage(1)}}>Reset</Button>
+            <Button size="sm" variant="outline" onClick={()=>{setSearch('');setCategories([]);setPriceMax(200000);setSort('newest');setPage(1)}}>Reset</Button>
           </Box>
 
           {/* Grid productos */}
@@ -127,6 +138,7 @@ export default function CatalogPage(){
           </Box>
         </Flex>
       </Container>
+      </Box>
     </Box>
   )
 }
