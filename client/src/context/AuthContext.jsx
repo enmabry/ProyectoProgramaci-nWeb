@@ -27,6 +27,26 @@ export function AuthProvider({ children }) {
     } finally { setLoading(false) }
   }
 
+  async function register({ username, email, password }){
+    setLoading(true)
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error registro')
+      setToken(data.token)
+      localStorage.setItem('token', data.token)
+      setUser(data.user)
+      return true
+    } catch (e){
+      console.error(e)
+      return false
+    } finally { setLoading(false) }
+  }
+
   function logout(){
     setToken('')
     setUser(null)
@@ -47,7 +67,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => { fetchMe() }, [token])
 
-  const value = { token, user, login, logout, loading }
+  const value = { token, user, login, register, logout, loading }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
