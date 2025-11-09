@@ -6,6 +6,7 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem('token') || '')
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [checking, setChecking] = useState(true)
 
   async function login(email, password){
     setLoading(true)
@@ -16,14 +17,14 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ email, password })
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error login')
+      if (!res.ok) return { ok: false, error: data.error || 'Error de inicio de sesión' }
       setToken(data.token)
       localStorage.setItem('token', data.token)
       setUser(data.user)
-      return true
+      return { ok: true, user: data.user }
     } catch (e){
       console.error(e)
-      return false
+      return { ok: false, error: 'No se pudo iniciar sesión' }
     } finally { setLoading(false) }
   }
 
@@ -36,14 +37,14 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ username, email, password })
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error registro')
+      if (!res.ok) return { ok: false, error: data.error || 'Error de registro' }
       setToken(data.token)
       localStorage.setItem('token', data.token)
       setUser(data.user)
-      return true
+      return { ok: true, user: data.user }
     } catch (e){
       console.error(e)
-      return false
+      return { ok: false, error: 'No se pudo registrar' }
     } finally { setLoading(false) }
   }
 
@@ -61,13 +62,27 @@ export function AuthProvider({ children }) {
       })
       const data = await res.json()
       if (res.ok) setUser(data.user)
-      else logout()
-    } catch { logout() }
+      else {
+        // Diferenciar expiración
+        if (data.code === 'TOKEN_EXPIRED') {
+          // Guardar marca para que UI pueda mostrar aviso
+          sessionStorage.setItem('expired', '1')
+        }
+        logout()
+      }
+    } catch {
+      logout()
+    }
   }
 
-  useEffect(() => { fetchMe() }, [token])
+  useEffect(() => {
+    // Al cargar y cuando cambie el token verificamos sesión
+    if (!token) { setUser(null); setChecking(false); return }
+    setChecking(true)
+    fetchMe().finally(() => setChecking(false))
+  }, [token])
 
-  const value = { token, user, login, register, logout, loading }
+  const value = { token, user, login, register, logout, loading, checking }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 

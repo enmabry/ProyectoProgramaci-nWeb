@@ -7,7 +7,10 @@ function authenticateJWT(req, res, next){
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
     next();
-  } catch {
+  } catch (e){
+    if (e?.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token expirado', code: 'TOKEN_EXPIRED' });
+    }
     res.status(401).json({ error: 'Token inválido' });
   }
 }

@@ -37,7 +37,12 @@ router.get('/me', (req,res)=>{
     if (!token) return res.status(401).json({ error: 'No autorizado' });
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     res.json({ user: payload });
-  }catch{ res.status(401).json({ error: 'Token inválido' }); }
+  }catch(e){
+    if (e?.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token expirado', code: 'TOKEN_EXPIRED' });
+    }
+    res.status(401).json({ error: 'Token inválido' });
+  }
 });
 
 module.exports = router;

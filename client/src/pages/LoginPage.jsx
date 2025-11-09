@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { Box, Flex, Tabs, TabList, Tab, Heading, FormControl, FormLabel, Input, InputGroup, InputRightElement, Button, Link, Text, Image } from '@chakra-ui/react'
+import { Box, Flex, Tabs, TabList, Tab, Heading, FormControl, FormLabel, FormErrorMessage, Input, InputGroup, InputRightElement, Button, Link, Text, Image, useToast } from '@chakra-ui/react'
 import '../styles/login.css'
 // Volver a usar el logo original del proyecto
 import logo from '../assets/images/logo.svg'
@@ -16,25 +16,64 @@ export default function LoginPage(){
   const [username, setUsername] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
+  const toast = useToast()
+  // Mostrar toast de sesión expirada si venimos de un logout automático
+  React.useEffect(() => {
+    if (sessionStorage.getItem('expired')) {
+      sessionStorage.removeItem('expired')
+      toast({ title: 'Sesión expirada', description: 'Vuelve a iniciar sesión.', status: 'warning', duration: 3000, isClosable: true })
+    }
+  }, [])
 
-  function validate(){
-    if (!email.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/)) return 'Email inválido'
-    if (password.length < 6) return 'La contraseña debe tener al menos 6 caracteres'
-    if (mode === 'register' && username.trim().length < 3) return 'Usuario mínimo 3 caracteres'
-    return ''
-  }
+  // estados de touched por campo para mostrar errores al interactuar
+  const [tEmail, setTEmail] = useState(false)
+  const [tPassword, setTPassword] = useState(false)
+  const [tUsername, setTUsername] = useState(false)
+
+  // Validaciones por campo
+  const emailError = !email
+    ? 'Email requerido'
+    : (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ? '' : 'Email inválido')
+  const passwordError = !password
+    ? 'Contraseña requerida'
+    : (password.length >= 6 ? '' : 'La contraseña debe tener al menos 6 caracteres')
+  const usernameError = mode === 'register'
+    ? (!username ? 'Usuario requerido' : (username.trim().length >= 3 ? '' : 'Usuario mínimo 3 caracteres'))
+    : ''
+
+  const isFormValid = mode === 'login'
+    ? !emailError && !passwordError
+    : !emailError && !passwordError && !usernameError
 
   async function onSubmit(e){
     e.preventDefault()
-    const vErr = validate()
-    if (vErr){ setError(vErr); return }
+    if (!isFormValid){
+      // marcar campos como tocados para mostrar errores
+      setTEmail(true); setTPassword(true); if (mode === 'register') setTUsername(true)
+      // mensaje general con el primer error
+      const firstErr = usernameError || emailError || passwordError
+      setError(firstErr)
+      return
+    }
     setError('')
-    const ok = mode === 'login'
+    const result = mode === 'login'
       ? await login(email, password)
       : await register({ username, email, password })
-    if (ok) navigate('/')
-    else setError('Revisa tus datos e inténtalo nuevamente')
+    if (result.ok){
+      toast({ title: mode==='login' ? 'Sesión iniciada' : 'Registro exitoso', status: 'success', duration: 2500, isClosable: true })
+      navigate('/')
+    } else {
+      setError(result.error || 'Revisa tus datos e inténtalo nuevamente')
+      toast({ title: 'Error', description: result.error, status: 'error', duration: 3000, isClosable: true })
+    }
   }
+
+  // Reset de touched/errores al cambiar de modo
+  // Evita que queden errores de username cuando vuelves a login
+  React.useEffect(() => {
+    setTUsername(false)
+    setError('')
+  }, [mode])
 
   return (
     <Flex minH="100vh" bg="brand.50">
@@ -64,27 +103,30 @@ export default function LoginPage(){
 
             <form onSubmit={onSubmit}>
               {mode==='register' && (
-                <FormControl mb={4}>
+                <FormControl mb={4} isInvalid={tUsername && !!usernameError}>
                   <FormLabel>Usuario</FormLabel>
-                  <Input value={username} onChange={e=>setUsername(e.target.value)} placeholder="tuusuario" borderRadius="full" />
+                  <Input value={username} onChange={e=>{ setUsername(e.target.value); if (!tUsername) return }} onBlur={()=>setTUsername(true)} placeholder="tuusuario" borderRadius="full" />
+                  <FormErrorMessage>{usernameError}</FormErrorMessage>
                 </FormControl>
               )}
 
-              <FormControl mb={5}>
+              <FormControl mb={5} isInvalid={tEmail && !!emailError}>
                 <FormLabel>Email</FormLabel>
-                <Input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="tu.email@ejemplo.com" borderRadius="full" />
+                <Input type="email" value={email} onChange={e=>{ setEmail(e.target.value) }} onBlur={()=>setTEmail(true)} placeholder="tu.email@ejemplo.com" borderRadius="full" />
+                <FormErrorMessage>{emailError}</FormErrorMessage>
               </FormControl>
 
-              <FormControl mb={4}>
+              <FormControl mb={4} isInvalid={tPassword && !!passwordError}>
                 <FormLabel>Contraseña</FormLabel>
                 <InputGroup>
-                  <Input type={showPass?'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} placeholder="******" borderRadius="full" pr="4.5rem" />
+                  <Input type={showPass?'text':'password'} value={password} onChange={e=>{ setPassword(e.target.value) }} onBlur={()=>setTPassword(true)} placeholder="******" borderRadius="full" pr="4.5rem" />
                   <InputRightElement width="4.5rem">
                     <Button size="sm" variant="ghost" colorScheme="brand" onClick={()=>setShowPass(s=>!s)}>
                       {showPass? 'Ocultar':'Mostrar'}
                     </Button>
                   </InputRightElement>
                 </InputGroup>
+                <FormErrorMessage>{passwordError}</FormErrorMessage>
               </FormControl>
               <Flex justify="flex-end" mb={4}>
                 <Link fontSize="sm" color="brand.700">¿Olvidaste tu contraseña?</Link>
@@ -92,7 +134,7 @@ export default function LoginPage(){
 
               {error && <Text color="red.500" mb={4}>{error}</Text>}
 
-              <Button type="submit" isLoading={loading} w="full" size="lg" variant="solid">
+              <Button type="submit" isLoading={loading} isDisabled={!isFormValid || loading} w="full" size="lg" variant="solid">
                 {mode==='login' ? 'Iniciar Sesión' : 'Crear cuenta'}
               </Button>
             </form>
