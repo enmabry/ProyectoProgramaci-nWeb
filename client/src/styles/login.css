@@ -1,0 +1,59 @@
+/* Estilos para la página de Login */
+
+/* Panel izquierdo: padding responsive y fondo blanco */
+.login-left-panel {
+  background: var(--chakra-colors-white);
+  padding: 1.5rem; /* base */
+}
+@media (min-width: 48em) { /* md */
+  .login-left-panel { padding: 3rem; }
+}
+@media (min-width: 80em) { /* xl */
+  .login-left-panel { padding: 4rem; }
+}
+
+/* Contenedor estrecho centrado */
+.auth-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 560px; /* base */
+  padding-top: 0.5rem;
+}
+@media (min-width: 80em) { /* xl */
+  .auth-container { max-width: 640px; }
+}
+
+/* Header de marca */
+.brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.brand-logo {
+  height: 96px;
+  max-width: 200px;
+  object-fit: contain;
+}
+.brand-title {
+  color: var(--chakra-colors-brand-700);
+  letter-spacing: 0.05em;
+  margin-top: 0.25rem;
+}
+
+/* Tarjeta del formulario */
+.auth-card {
+  background: var(--chakra-colors-white);
+  border-radius: var(--chakra-radii-xl);
+  box-shadow: var(--chakra-shadows-sm);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 1.25rem; /* base */
+}
+@media (min-width: 48em) { /* md */
+  .auth-card { padding: 1.5rem; }
+}
+@media (min-width: 62em) { /* lg */
+  .auth-card { padding: 2rem; }
+}

@@ -6,7 +6,7 @@ import App from './App'
 import { AuthProvider } from './context/AuthContext'
 
 const theme = extendTheme({
-  fonts: { heading: '"Playfair Display", serif', body: 'Inter, system-ui, sans-serif' },
+  fonts: { heading: 'Lora, serif', body: 'Inter, system-ui, sans-serif' },
   colors: {
     // Paleta basada en tonos profundos y saturados de la fotografía (hojas verdes oscuras)
     brand: {
