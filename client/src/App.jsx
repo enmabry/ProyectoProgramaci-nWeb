@@ -35,9 +35,22 @@ function AdminRoute({ children }){
 export default function App(){
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
       <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
     </Routes>
   )
+}
+
+function GuestRoute({ children }){
+  const { user, checking } = useAuth();
+  if (checking) {
+    return (
+      <Center minH="100vh">
+        <Spinner size="xl" thickness='4px' color='brand.500' />
+      </Center>
+    )
+  }
+  if (user) return <Navigate to="/" replace />
+  return children
 }

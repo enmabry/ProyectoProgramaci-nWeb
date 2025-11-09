@@ -54,4 +54,21 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, () => console.log(`Server on http://localhost:${PORT}`));
+// --- Inicio servidor con fallback de puerto ---
+let currentPort = parseInt(PORT, 10);
+function attemptListen() {
+  server.listen(currentPort, () => console.log(`Server on http://localhost:${currentPort}`));
+}
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.warn(`Puerto ${currentPort} en uso, probando ${currentPort + 1}...`);
+    currentPort += 1; // incrementa puerto y reintenta
+    setTimeout(attemptListen, 250);
+  } else {
+    console.error('Error al iniciar servidor:', err);
+    process.exit(1);
+  }
+});
+
+attemptListen();

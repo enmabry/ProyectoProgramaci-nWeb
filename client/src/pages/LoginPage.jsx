@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { Box, Flex, Tabs, TabList, Tab, Heading, FormControl, FormLabel, FormErrorMessage, Input, InputGroup, InputRightElement, Button, Link, Text, Image, useToast } from '@chakra-ui/react'
@@ -18,7 +18,7 @@ export default function LoginPage(){
   const navigate = useNavigate()
   const toast = useToast()
   // Mostrar toast de sesión expirada si venimos de un logout automático
-  React.useEffect(() => {
+  useEffect(() => {
     if (sessionStorage.getItem('expired')) {
       sessionStorage.removeItem('expired')
       toast({ title: 'Sesión expirada', description: 'Vuelve a iniciar sesión.', status: 'warning', duration: 3000, isClosable: true })
@@ -36,7 +36,11 @@ export default function LoginPage(){
     : (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ? '' : 'Email inválido')
   const passwordError = !password
     ? 'Contraseña requerida'
-    : (password.length >= 6 ? '' : 'La contraseña debe tener al menos 6 caracteres')
+    : (mode === 'register'
+        ? (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)
+            ? ''
+            : 'Mín. 8, incluye mayúscula, minúscula y número')
+        : (password.length >= 6 ? '' : 'La contraseña debe tener al menos 6 caracteres'))
   const usernameError = mode === 'register'
     ? (!username ? 'Usuario requerido' : (username.trim().length >= 3 ? '' : 'Usuario mínimo 3 caracteres'))
     : ''
@@ -61,7 +65,7 @@ export default function LoginPage(){
       : await register({ username, email, password })
     if (result.ok){
       toast({ title: mode==='login' ? 'Sesión iniciada' : 'Registro exitoso', status: 'success', duration: 2500, isClosable: true })
-      navigate('/')
+      navigate('/', { replace: true })
     } else {
       setError(result.error || 'Revisa tus datos e inténtalo nuevamente')
       toast({ title: 'Error', description: result.error, status: 'error', duration: 3000, isClosable: true })
@@ -70,7 +74,7 @@ export default function LoginPage(){
 
   // Reset de touched/errores al cambiar de modo
   // Evita que queden errores de username cuando vuelves a login
-  React.useEffect(() => {
+  useEffect(() => {
     setTUsername(false)
     setError('')
   }, [mode])
