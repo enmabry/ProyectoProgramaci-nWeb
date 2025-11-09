@@ -166,9 +166,6 @@ export default function ChatWidget() {
               <Avatar size="sm" name="Soporte" bg="brand.700" />
               <Box>
                 <Heading size="sm">Soporte A Priori Verde</Heading>
-                <Text fontSize="xs" opacity={0.9}>
-                  {connected ? '🟢 En línea' : '🔴 Desconectado'}
-                </Text>
               </Box>
             </HStack>
             <IconButton
