@@ -1,14 +1,14 @@
 import React from 'react'
 import { Box, Heading, Text, VStack, Image, Container } from '@chakra-ui/react'
+import NavbarGlass from '../components/NavbarGlass'
 import LogosEvolucion from '../assets/images/bocetosLogos.png'
 import PaletaColores from '../assets/images/paletaDeColores.png'
 
-// Ajusta las rutas de las imágenes según donde las subiste (ej: /images/logo-evolucion.png, /images/paleta-colores.png)
-// Si están en public/ se pueden referenciar directamente con /images/... 
-
 export default function AboutPage() {
   return (
-    <Container maxW="5xl" py={12}>
+    <>
+      <NavbarGlass />
+      <Container maxW="5xl" py={12} mt={20}>
       <VStack align="start" spacing={10}>
         <Box>
           <Heading as="h1" size="lg" mb={6}>Nuestra Historia</Heading>
@@ -46,5 +46,6 @@ export default function AboutPage() {
         </Box>
       </VStack>
     </Container>
+    </>
   )
 }

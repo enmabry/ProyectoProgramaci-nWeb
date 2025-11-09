@@ -29,7 +29,20 @@ Aplicación web de e‑commerce de plantas con panel de administración, carrito
 └─ .env                 # Variables (ver docs/ENVIRONMENT.md)
 ```
 
-## Cómo ejecutar (local)
+## Inicio rápido (Docker - recomendado)
+
+```powershell
+docker compose up -d
+docker compose exec backend npm run seed:admin
+docker compose exec backend npm run seed:products
+```
+
+- Frontend: http://localhost:8080
+- API/Socket: http://localhost:3000
+
+Ver `docs/DESARROLLO.md` para guía completa de desarrollo con Docker.
+
+## Modo local (opcional)
 
 1. Backend
    - Copia `.env.example` a `.env` y completa credenciales
@@ -45,22 +58,9 @@ Aplicación web de e‑commerce de plantas con panel de administración, carrito
    - `npm run seed:admin`
    - `npm run seed:products`
 
-## Cómo ejecutar (Docker)
-
-Consulta `docs/DOCKER.md` para el paso a paso. En breve:
-
-```powershell
-docker compose build
-docker compose up -d
-docker compose exec backend npm run seed:admin
-docker compose exec backend npm run seed:products
-```
-
-- Frontend: http://localhost:8080
-- API/Socket: http://localhost:3000
-
 ## Documentación
 
+- **Desarrollo**: `docs/DESARROLLO.md` (guía completa Docker)
 - Autenticación: `docs/AUTHENTICATION.md`
 - Backend: `docs/BACKEND.md`
 - Frontend: `client/README.md`
