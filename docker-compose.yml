@@ -1,0 +1,44 @@
+version: "3.9"
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: aprioriverde
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PORT: 3000
+      MONGO_URI: mongodb://mongo:27017/aprioriverde
+    depends_on:
+      - mongo
+    ports:
+      - "3000:3000"
+    # Volumen opcional para desarrollo (comentar en producción):
+    # volumes:
+    #   - ./src:/app/src
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.frontend
+    container_name: frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  mongo_data:
