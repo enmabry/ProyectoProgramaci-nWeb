@@ -12,6 +12,7 @@ Aplicación web de e‑commerce de plantas con panel de administración, carrito
 - Chat en tiempo real con Socket.IO (widget de usuario y bandeja de admin)
 - Docker Compose para levantar MongoDB, API y Frontend
 
+
 ## Stack
 
 - Backend: Node.js + Express, Mongoose/MongoDB, Multer + Cloudinary, Socket.IO
@@ -214,12 +215,6 @@ Abre `http://localhost:3000`.
 - **`401 Token inválido`**: envía `Authorization: Bearer <token>` y verifica `JWT_SECRET` en prod/dev.
 - **CORS**: si separas front y back, activa `cors()` y define `origin` si hace falta.
 - **Sockets**: el cliente debe enviar `auth: { token }`; en el server, valida con `io.use(...)` + `jwt.verify`.
-
----
-
-## 📜 Licencia
-Uso académico/educativo. Adáptalo libremente para tus prácticas.
-
 ---
 
 ### 🌱 Nombre del proyecto

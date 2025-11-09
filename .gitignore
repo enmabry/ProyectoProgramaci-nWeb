@@ -4,6 +4,7 @@ node_modules/
 # Entornos / secretos
 .env
 .env.*
+CREDENCIALES_EVALUACION.md
 
 # Logs
 npm-debug.log*
