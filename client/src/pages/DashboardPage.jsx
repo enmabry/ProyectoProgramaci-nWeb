@@ -85,17 +85,17 @@ function NewProducts(){
 
 function Categories(){
   const cats = [
-    { key:'interior', label:'Plantas de Interior' },
-    { key:'exterior', label:'Plantas de Exterior' },
-    { key:'suculentas', label:'Suculentas y Cactus' },
-    { key:'aromaticas', label:'Plantas Aromáticas' }
+    { key:'Interior', label:'Plantas de Interior' },
+    { key:'Suculentas', label:'Suculentas y Cactus' },
+    { key:'Tropical', label:'Plantas Tropicales' },
+    { key:'Medicinal', label:'Plantas Medicinales' }
   ]
   return (
     <Container maxW="7xl" py={10}>
       <Heading size="md" mb={4}>Explora nuestras categorías</Heading>
       <SimpleGrid columns={{ base:1, md:4 }} spacing={5}>
         {cats.map(c => (
-          <Box key={c.key} className="category-card">
+          <Box key={c.key} as={Link} to={`/catalog?category=${encodeURIComponent(c.key)}`} className="category-card" _hover={{ transform:'scale(1.02)', transition:'transform 0.2s' }}>
             <Box className="category-card__overlay" />
             <Flex className="category-card__content" align="center" justify="center">
               <Heading size="sm" className="category-card__title">{c.label}</Heading>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { Box, Container, Flex, Heading, SimpleGrid, Select, Input, Button, Slider, SliderTrack, SliderFilledTrack, SliderThumb, Text, Checkbox, CheckboxGroup, Stack, Skeleton } from '@chakra-ui/react'
+import { useSearchParams } from 'react-router-dom'
 import NavbarGlass from '../components/NavbarGlass'
 import '../styles/catalog.css'
 
@@ -29,6 +30,7 @@ function ProductTile({ p }){
 }
 
 export default function CatalogPage(){
+  const [searchParams] = useSearchParams()
   const [all,setAll] = useState([])
   const [loading,setLoading] = useState(true)
 
@@ -39,6 +41,12 @@ export default function CatalogPage(){
   const [priceMax,setPriceMax] = useState(200000)
   const [page,setPage] = useState(1)
   const pageSize = 12
+
+  // Aplicar filtro de categoría desde query params al montar
+  useEffect(()=>{
+    const cat = searchParams.get('category')
+    if(cat) setCategories([cat])
+  },[searchParams])
 
   useEffect(()=>{
     let mounted=true
