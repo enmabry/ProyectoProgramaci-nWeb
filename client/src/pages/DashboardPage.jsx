@@ -59,7 +59,7 @@ function Hero(){
           <InputGroup maxW="lg" className="hero-search-group">
             <Input placeholder="¿Qué planta buscas?" className="hero-search" />
           </InputGroup>
-          <Button size="lg" variant="solid">Ver catálogo</Button>
+          <Button size="lg" variant="solid" as={Link} to="/catalog">Ver catálogo</Button>
         </VStack>
       </Container>
     </Box>

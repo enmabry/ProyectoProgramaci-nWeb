@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { Center, Spinner } from '@chakra-ui/react'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
+import CatalogPage from './pages/CatalogPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import AdminPage from './pages/AdminPage'
@@ -39,6 +40,7 @@ export default function App(){
     <Routes>
       <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
   <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+  <Route path="/catalog" element={<ProtectedRoute><CatalogPage /></ProtectedRoute>} />
   <Route path="/forgot" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
   <Route path="/reset" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
       <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
