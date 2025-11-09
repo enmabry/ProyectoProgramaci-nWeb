@@ -97,8 +97,16 @@ export default function ProductDetailPage() {
     const currentImage = images[selectedImage]?.url || ''
 
     const careLabels = {
-        light: { baja: 'Luz baja o indirecta', media: 'Luz media filtrada', alta: 'Luz brillante directa' },
-        watering: { poco: 'Riego esporádico', medio: 'Riego moderado', frecuente: 'Riego frecuente' },
+        light: {
+            baja: 'Prefiere luz baja o sombra brillante (indirecta). Evita sol directo fuerte.',
+            media: 'Luz media filtrada. Cerca de una ventana brillante sin sol directo intenso.',
+            alta: 'Luz muy brillante o sol directo suave. Ideal ventanas orientadas al este.'
+        },
+        watering: {
+            poco: 'Riegos espaciados. Deja secar la capa superior antes de volver a hidratar.',
+            medio: 'Riego moderado. Mantén el sustrato ligeramente húmedo, no encharcado.',
+            frecuente: 'Necesita humedad constante. Revisa el sustrato seguido y evita que se seque.'
+        }
     }
 
     return (
@@ -227,17 +235,17 @@ export default function ProductDetailPage() {
                             <CareCard
                                 icon="light"
                                 title="Luz"
-                                description={careLabels.light[product.care?.light] || product.care?.light || 'Media'}
+                                description={careLabels.light[product.care?.light] || 'Luz media filtrada'}
                             />
                             <CareCard
                                 icon="water"
                                 title="Riego"
-                                description={careLabels.watering[product.care?.watering] || product.care?.watering || 'Moderado'}
+                                description={careLabels.watering[product.care?.watering] || 'Riego moderado'}
                             />
                             <CareCard
                                 icon="temp"
                                 title="Temperatura"
-                                description={product.care?.temp || 'Ideal entre 18°C y 24°C. Proteger de corrientes de aire frío o intensas.'}
+                                description={product.care?.temp || '18–24°C estable, evita cambios bruscos y corrientes frías.'}
                             />
                         </Flex>
                     </Box>

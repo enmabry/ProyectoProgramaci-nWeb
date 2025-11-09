@@ -136,19 +136,19 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
       formDataToSend.append('stock', formData.stock || 0)
       formDataToSend.append('isFeatured', formData.isFeatured)
 
-      // Imágenes de archivos
+      // Si es edición, preservar imágenes existentes
+      if (product && product.images && product.images.length > 0) {
+        formDataToSend.append('existingImages', JSON.stringify(product.images))
+      }
+
+      // Imágenes de archivos nuevos
       imageFiles.forEach(file => {
         formDataToSend.append('images', file)
       })
 
-      // URLs de imágenes
+      // URLs de imágenes nuevas
       if (imageUrls.trim()) {
         formDataToSend.append('imageUrls', imageUrls.trim())
-      }
-
-      // Si es edición, incluir imágenes existentes
-      if (product && product.images) {
-        formDataToSend.append('images', JSON.stringify(product.images))
       }
 
       const url = product ? `/api/products/${product._id}` : '/api/products'

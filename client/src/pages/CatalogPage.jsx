@@ -43,7 +43,8 @@ export default function CatalogPage(){
   const [search,setSearch] = useState('')
   const [sort,setSort] = useState('newest')
   const [categories,setCategories] = useState([])
-  const [priceMax,setPriceMax] = useState(200000)
+  // Usamos precio máximo en miles (K). 80 => 80.00 equivale a 80.000 COP
+  const [priceMaxK,setPriceMaxK] = useState(80)
   const [page,setPage] = useState(1)
   const pageSize = 9
 
@@ -70,13 +71,14 @@ export default function CatalogPage(){
   },[all])
 
   const filtered = useMemo(()=>{
+    const priceMax = priceMaxK
     return all.filter(p=>{
       if(search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
       if(categories.length && !p.categories?.some(c=> categories.includes(c))) return false
       if(p.price > priceMax) return false
       return true
     })
-  },[all,search,categories,priceMax])
+  },[all,search,categories,priceMaxK])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
   const pageItems = filtered.slice((page-1)*pageSize, page*pageSize)
@@ -117,13 +119,13 @@ export default function CatalogPage(){
               </CheckboxGroup>
             </Box>
             <Box mb={6}>
-              <Text mb={2} className="filter-label">Precio máximo: {formatCurrency(priceMax)}</Text>
-              <Slider aria-label='precio-max' min={0} max={200000} step={5000} value={priceMax} onChange={v=>setPriceMax(v)}>
+              <Text mb={2} className="filter-label">Precio máximo: $ {priceMaxK.toFixed(2)}</Text>
+              <Slider aria-label='precio-max' min={0} max={80} step={5} value={priceMaxK} onChange={v=>setPriceMaxK(v)}>
                 <SliderTrack><SliderFilledTrack bg='brand.500' /></SliderTrack>
                 <SliderThumb boxSize={5} />
               </Slider>
             </Box>
-            <Button size="sm" variant="outline" onClick={()=>{setSearch('');setCategories([]);setPriceMax(200000);setSort('newest');setPage(1)}}>Reset</Button>
+            <Button size="sm" variant="outline" onClick={()=>{setSearch('');setCategories([]);setPriceMaxK(80);setSort('newest');setPage(1)}}>Reset</Button>
           </Box>
 
           {/* Grid productos */}

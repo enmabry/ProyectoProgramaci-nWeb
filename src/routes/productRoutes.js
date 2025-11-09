@@ -116,13 +116,16 @@ router.put('/:id', authenticateJWT, authorizeRoles('admin'), upload.array('image
   try {
     const payload = await buildPayloadFromBody(req.body, req.files);
 
-    // Si viene un arreglo "images" (JSON) en el body, intentamos combinarlo con las nuevas
-    if (req.body.images) {
+    // Manejar imágenes: preservar existentes y añadir nuevas
+    if (req.body.existingImages) {
       try {
-        const existing = Array.isArray(req.body.images) ? req.body.images : JSON.parse(req.body.images);
+        const existing = JSON.parse(req.body.existingImages);
         const added = payload.images || [];
         payload.images = [...existing, ...added];
-      } catch { /* si no es JSON válido, dejamos lo que ya armó buildPayload */ }
+      } catch (e) {
+        console.error('Error parsing existingImages:', e);
+        // Si falla el parse, usar solo las nuevas
+      }
     }
 
     const product = await Product.findByIdAndUpdate(

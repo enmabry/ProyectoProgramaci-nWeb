@@ -34,7 +34,6 @@ export default function NavbarGlass(){
             {!isAdmin && (
               <>
                 <Link className="nav-link" to="#">Sobre Nosotros</Link>
-                <Link className="nav-link" to="#">Contacto</Link>
               </>
             )}
             {isAdmin && (
