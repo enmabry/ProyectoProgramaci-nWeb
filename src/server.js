@@ -25,6 +25,13 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(require('path').join(__dirname, 'public')));
 
+const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/productRoutes');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+
+
 // --- Rutas de prueba ---
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
