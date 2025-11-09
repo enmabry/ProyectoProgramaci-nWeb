@@ -6,6 +6,13 @@ import HeroImage from '../assets/images/fondoDashboard.jpg'
 import '../styles/dashboard.css'
 import NavbarGlass from '../components/NavbarGlass'
 
+function formatCurrency(value){
+  try {
+    return new Intl.NumberFormat('es-CO', { style:'currency', currency:'COP', maximumFractionDigits:0 }).format(value || 0)
+  } catch {
+    return `$${(value||0).toLocaleString('es-CO')}`
+  }
+}
 
 function Hero(){
   return (
@@ -39,7 +46,7 @@ function ProductCard({ product }){
       </Box>
       <Box className="product-card__body">
         <Text className="product-card__title" noOfLines={1}>{product?.name || 'Planta'}</Text>
-        <Text className="product-card__price">{product?.price ? `€${product.price.toFixed(2)}` : '—'}</Text>
+        <Text className="product-card__price">{product?.price != null ? formatCurrency(product.price) : '—'}</Text>
         <Button mt={3} size="sm" w="full">Añadir al carrito</Button>
       </Box>
     </Box>
@@ -53,7 +60,7 @@ function NewProducts(){
     let mounted = true
     fetch('/api/products?sort=newest')
       .then(r => r.json())
-      .then(d => { if (mounted) { setItems(Array.isArray(d) ? d.slice(0,8) : []); setLoading(false) } })
+      .then(d => { if (mounted) { setItems(Array.isArray(d) ? d.slice(0,4) : []); setLoading(false) } })
       .catch(() => { if (mounted) { setItems([]); setLoading(false) } })
     return () => { mounted = false }
   }, [])
@@ -61,7 +68,7 @@ function NewProducts(){
     <Container maxW="7xl" py={10}>
       <Heading size="md" mb={4}>Novedades</Heading>
       <SimpleGrid columns={{ base:2, md:4 }} spacing={5}>
-        {loading ? Array.from({ length: 8 }).map((_,i)=> (
+        {loading ? Array.from({ length: 4 }).map((_,i)=> (
           <Box key={i}>
             <Skeleton h="210px" borderRadius="lg" />
             <Skeleton mt={3} h="18px" />
