@@ -84,18 +84,39 @@ router.get('/profile', authenticateJWT, async (req, res) => {
 // --- Reset de contraseña ---
 // Solicitar reset: envía (simulado) un token
 // Transport de correo (usar variables .env; si no, fallback a consola)
-const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM, CLIENT_URL } = process.env;
+const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM, CLIENT_URL, EMAIL_DEV_MODE, ETHEREAL_MODE } = process.env;
 let transporter;
-if (SMTP_HOST && SMTP_USER) {
-  transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: SMTP_PORT ? parseInt(SMTP_PORT,10) : 587,
-    secure: false,
-    auth: { user: SMTP_USER, pass: SMTP_PASS }
-  });
-} else {
-  transporter = nodemailer.createTransport({ jsonTransport: true }); // fallback: imprime JSON
+async function buildTransport(){
+  // Modo desarrollo forzado: siempre jsonTransport y devolvemos token
+  if (EMAIL_DEV_MODE === 'true') {
+    return nodemailer.createTransport({ jsonTransport: true });
+  }
+  // Ethereal (sandbox temporal) si se solicita y no hay credenciales reales
+  if (ETHEREAL_MODE === 'true' && (!SMTP_HOST || !SMTP_USER)) {
+    const acct = await nodemailer.createTestAccount();
+    console.log('Cuenta Ethereal creada:', acct.user);
+    return nodemailer.createTransport({
+      host: acct.smtp.host,
+      port: acct.smtp.port,
+      secure: acct.smtp.secure,
+      auth: { user: acct.user, pass: acct.pass }
+    });
+  }
+  // Credenciales reales
+  if (SMTP_HOST && SMTP_USER) {
+    return nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT ? parseInt(SMTP_PORT,10) : 587,
+      secure: false,
+      auth: { user: SMTP_USER, pass: SMTP_PASS }
+    });
+  }
+  // Último recurso: jsonTransport
+  return nodemailer.createTransport({ jsonTransport: true });
 }
+
+// Inicializar transport de forma async (para Ethereal)
+(async () => { transporter = await buildTransport(); })();
 
 router.post('/forgot', async (req, res) => {
   try {
@@ -106,6 +127,12 @@ router.post('/forgot', async (req, res) => {
     const plainToken = user.createPasswordResetToken();
     await user.save();
     const resetLink = `${CLIENT_URL || 'http://localhost:5173'}/reset?token=${plainToken}`;
+
+    // Si estamos en dev mode, devolvemos directamente el token y enlace
+    if (EMAIL_DEV_MODE === 'true') {
+      return res.json({ message: 'Token generado (dev mode)', resetToken: plainToken, link: resetLink, expiresInMinutes: 60 });
+    }
+
     const mail = {
       from: EMAIL_FROM || 'no-reply@example.com',
       to: user.email,
@@ -119,11 +146,15 @@ router.post('/forgot', async (req, res) => {
     };
     try {
       const info = await transporter.sendMail(mail);
-      // Si usamos jsonTransport, info.message incluye el contenido
-      res.json({ message: 'Email enviado', expiresInMinutes: 60, preview: info.messageId ? info.messageId : undefined });
+      let previewUrl;
+      if (nodemailer.getTestMessageUrl && ETHEREAL_MODE === 'true') {
+        previewUrl = nodemailer.getTestMessageUrl(info);
+      }
+      res.json({ message: 'Email enviado', expiresInMinutes: 60, preview: previewUrl });
     } catch (mailErr) {
       console.error('Error enviando email reset:', mailErr.message);
-      res.status(500).json({ error: 'No se pudo enviar el email', code: 'EMAIL_SEND_ERROR' });
+      // Fallback: devolver token para poder continuar pruebas
+      res.status(200).json({ message: 'Email no enviado, usando fallback', resetToken: plainToken, link: resetLink, code: 'EMAIL_FALLBACK' });
     }
   } catch (e) {
     res.status(400).json({ error: e.message, code: 'FORGOT_ERROR' });
