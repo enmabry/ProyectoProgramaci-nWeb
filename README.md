@@ -12,6 +12,7 @@ Aplicación web de e‑commerce de plantas con panel de administración, carrito
 - Chat en tiempo real con Socket.IO (widget de usuario y bandeja de admin)
 - Docker Compose para levantar MongoDB, API y Frontend
 
+
 ## Stack
 
 - Backend: Node.js + Express, Mongoose/MongoDB, Multer + Cloudinary, Socket.IO

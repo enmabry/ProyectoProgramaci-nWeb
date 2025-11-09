@@ -29,9 +29,13 @@ export function SocketProvider({ children }) {
     }
 
     // Conectar al socket con el token
-    const newSocket = io('http://localhost:3000', {
-      auth: { token }
-    })
+    // Producción: si no se pasa URL, el cliente usa el mismo origen (Netlify) y
+    // con un proxy/redirect de /socket.io/* al backend, funciona sin cambiar código.
+    // Local: si quieres apuntar a un backend específico, define VITE_SOCKET_URL.
+    const socketUrl = import.meta.env.VITE_SOCKET_URL
+    const newSocket = socketUrl
+      ? io(socketUrl, { auth: { token } })
+      : io({ auth: { token } })
 
     newSocket.on('connect', () => {
       console.log('Socket conectado')
