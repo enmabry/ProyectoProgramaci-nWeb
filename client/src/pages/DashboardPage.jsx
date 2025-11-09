@@ -36,7 +36,13 @@ function Hero(){
 
 function ProductCard({ product }){
   return (
-    <Box className="product-card" overflow="hidden">
+    <Box 
+      as={Link} 
+      to={`/product/${product.slug}`} 
+      className="product-card" 
+      overflow="hidden"
+      _hover={{ transform:'scale(1.03)', transition:'transform 0.2s', textDecoration:'none' }}
+    >
       <Box className="product-card__media">
         {product?.images?.[0]?.url ? (
           <Image src={product.images[0].url} alt={product.name} className="product-card__img" />

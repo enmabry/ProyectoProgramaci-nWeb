@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { Box, Container, Flex, Heading, SimpleGrid, Select, Input, Button, Slider, SliderTrack, SliderFilledTrack, SliderThumb, Text, Checkbox, CheckboxGroup, Stack, Skeleton } from '@chakra-ui/react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import NavbarGlass from '../components/NavbarGlass'
 import '../styles/catalog.css'
 
@@ -14,7 +14,12 @@ function formatCurrency(value){
 
 function ProductTile({ p }){
   return (
-    <Box className="catalog-card">
+    <Box 
+      as={Link} 
+      to={`/product/${p.slug}`} 
+      className="catalog-card"
+      _hover={{ transform:'scale(1.03)', transition:'transform 0.2s', textDecoration:'none' }}
+    >
       <Box className="catalog-card__media">
         {p.images?.[0]?.url ? (
           <img src={p.images[0].url} alt={p.name} />

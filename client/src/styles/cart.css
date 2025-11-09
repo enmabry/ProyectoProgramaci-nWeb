@@ -1,0 +1,9 @@
+.cart-wrapper {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), #fff 100px)
+}
+
+.cart-item__image {
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
