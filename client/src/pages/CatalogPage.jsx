@@ -40,7 +40,7 @@ export default function CatalogPage(){
   const [categories,setCategories] = useState([])
   const [priceMax,setPriceMax] = useState(200000)
   const [page,setPage] = useState(1)
-  const pageSize = 12
+  const pageSize = 9
 
   // Aplicar filtro de categoría desde query params al montar
   useEffect(()=>{
