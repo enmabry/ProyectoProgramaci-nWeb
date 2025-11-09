@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Container, Heading, Text, Tabs, TabList, TabPanels, Tab, TabPanel, Button, HStack, Table, Thead, Tbody, Tr, Th, Td, Image, Badge, IconButton, Skeleton, useToast, useDisclosure } from '@chakra-ui/react'
 import { MdAdd, MdEdit, MdDelete } from 'react-icons/md'
+import { useAuth } from '../context/AuthContext'
 import NavbarGlass from '../components/NavbarGlass'
 import ProductFormModal from '../components/ProductFormModal'
 import ConfirmDialog from '../components/ConfirmDialog'
+import ChatsTab from '../components/ChatsTab'
 import '../styles/admin.css'
 
 function formatCurrency(value){
@@ -248,6 +250,7 @@ function OrdersTab(){
 
 export default function AdminPage(){
   const [tabIndex, setTabIndex] = useState(0)
+  const { token } = useAuth()
 
   return (
     <Box>
@@ -256,12 +259,13 @@ export default function AdminPage(){
         <Container maxW="7xl">
           <Box mb={6}>
             <Heading size="lg" mb={2}>Panel de Administración</Heading>
-            <Text color="gray.600">Gestiona productos, usuarios y pedidos desde aquí</Text>
+            <Text color="gray.600">Gestiona productos, usuarios, pedidos y conversaciones desde aquí</Text>
           </Box>
 
           <Tabs index={tabIndex} onChange={setTabIndex} colorScheme="brand" variant="enclosed">
             <TabList>
               <Tab fontWeight="600">Productos</Tab>
+              <Tab fontWeight="600">Conversaciones</Tab>
               <Tab fontWeight="600">Usuarios</Tab>
               <Tab fontWeight="600">Pedidos</Tab>
             </TabList>
@@ -269,6 +273,9 @@ export default function AdminPage(){
             <TabPanels>
               <TabPanel px={0} pt={6}>
                 <ProductsTab />
+              </TabPanel>
+              <TabPanel px={0} pt={6}>
+                <ChatsTab token={token} />
               </TabPanel>
               <TabPanel px={0} pt={6}>
                 <UsersTab />
