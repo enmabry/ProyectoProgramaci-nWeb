@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link as RouterLink } from 'react-router-dom'
 import { Box, Flex, Tabs, TabList, Tab, Heading, FormControl, FormLabel, FormErrorMessage, Input, InputGroup, InputRightElement, Button, Link, Text, Image, useToast } from '@chakra-ui/react'
 import '../styles/login.css'
 // Volver a usar el logo original del proyecto
@@ -109,14 +109,14 @@ export default function LoginPage(){
               {mode==='register' && (
                 <FormControl mb={4} isInvalid={tUsername && !!usernameError}>
                   <FormLabel>Usuario</FormLabel>
-                  <Input value={username} onChange={e=>{ setUsername(e.target.value); if (!tUsername) return }} onBlur={()=>setTUsername(true)} placeholder="tuusuario" borderRadius="full" />
+                  <Input value={username} onChange={e=>{ setUsername(e.target.value); if (!tUsername) return }} onBlur={()=>setTUsername(true)} placeholder="Tu usuario" borderRadius="full" />
                   <FormErrorMessage>{usernameError}</FormErrorMessage>
                 </FormControl>
               )}
 
               <FormControl mb={5} isInvalid={tEmail && !!emailError}>
                 <FormLabel>Email</FormLabel>
-                <Input type="email" value={email} onChange={e=>{ setEmail(e.target.value) }} onBlur={()=>setTEmail(true)} placeholder="tu.email@ejemplo.com" borderRadius="full" />
+                <Input type="email" value={email} onChange={e=>{ setEmail(e.target.value) }} onBlur={()=>setTEmail(true)} placeholder="email@ejemplo.com" borderRadius="full" />
                 <FormErrorMessage>{emailError}</FormErrorMessage>
               </FormControl>
 
@@ -133,7 +133,7 @@ export default function LoginPage(){
                 <FormErrorMessage>{passwordError}</FormErrorMessage>
               </FormControl>
               <Flex justify="flex-end" mb={4}>
-                <Link fontSize="sm" color="brand.700">¿Olvidaste tu contraseña?</Link>
+                <Link as={RouterLink} to="/forgot" fontSize="sm" color="brand.700">¿Olvidaste tu contraseña?</Link>
               </Flex>
 
               {error && <Text color="red.500" mb={4}>{error}</Text>}

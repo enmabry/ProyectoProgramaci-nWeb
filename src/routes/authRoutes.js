@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const User = require('../models/User');
 const { authenticateJWT } = require('../middleware/authenticateJWT');
+const nodemailer = require('nodemailer');
 
 const router = Router();
 const sign = (u) => jwt.sign(
@@ -82,6 +83,20 @@ router.get('/profile', authenticateJWT, async (req, res) => {
 
 // --- Reset de contraseña ---
 // Solicitar reset: envía (simulado) un token
+// Transport de correo (usar variables .env; si no, fallback a consola)
+const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, EMAIL_FROM, CLIENT_URL } = process.env;
+let transporter;
+if (SMTP_HOST && SMTP_USER) {
+  transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT ? parseInt(SMTP_PORT,10) : 587,
+    secure: false,
+    auth: { user: SMTP_USER, pass: SMTP_PASS }
+  });
+} else {
+  transporter = nodemailer.createTransport({ jsonTransport: true }); // fallback: imprime JSON
+}
+
 router.post('/forgot', async (req, res) => {
   try {
     const { email } = req.body;
@@ -90,8 +105,26 @@ router.post('/forgot', async (req, res) => {
     if (!user) return res.status(404).json({ error: 'No existe usuario con ese email', code: 'EMAIL_NOT_FOUND' });
     const plainToken = user.createPasswordResetToken();
     await user.save();
-    // Simulación de envío: en producción enviar email real
-    res.json({ message: 'Token generado', resetToken: plainToken, expiresInMinutes: 60 });
+    const resetLink = `${CLIENT_URL || 'http://localhost:5173'}/reset?token=${plainToken}`;
+    const mail = {
+      from: EMAIL_FROM || 'no-reply@example.com',
+      to: user.email,
+      subject: 'Recupera tu contraseña',
+      html: `
+        <p>Has solicitado restablecer tu contraseña.</p>
+        <p>Haz clic en el siguiente enlace (válido 60 minutos):</p>
+        <p><a href="${resetLink}">${resetLink}</a></p>
+        <p>Si no solicitaste esto, ignora este correo.</p>
+      `
+    };
+    try {
+      const info = await transporter.sendMail(mail);
+      // Si usamos jsonTransport, info.message incluye el contenido
+      res.json({ message: 'Email enviado', expiresInMinutes: 60, preview: info.messageId ? info.messageId : undefined });
+    } catch (mailErr) {
+      console.error('Error enviando email reset:', mailErr.message);
+      res.status(500).json({ error: 'No se pudo enviar el email', code: 'EMAIL_SEND_ERROR' });
+    }
   } catch (e) {
     res.status(400).json({ error: e.message, code: 'FORGOT_ERROR' });
   }
