@@ -76,6 +76,15 @@ async function buildPayloadFromBody(body, files){
   const maybeBadges = toArray(payload.badges);
   if (maybeBadges) payload.badges = maybeBadges;
 
+  // Objeto care (light, watering, temp)
+  if (payload.care && typeof payload.care === 'string') {
+    try {
+      payload.care = JSON.parse(payload.care);
+    } catch {
+      // Si falla el parse, dejarlo como está
+    }
+  }
+
   // Imágenes subidas como archivos: file.path = URL y file.filename = public_id
   const uploaded = Array.isArray(files)
     ? files
