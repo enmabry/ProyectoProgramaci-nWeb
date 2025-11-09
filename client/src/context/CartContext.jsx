@@ -9,15 +9,16 @@ export function useCart(){
 }
 
 export function CartProvider({ children }){
-  const [items, setItems] = useState([])
-
-  // Cargar carrito desde localStorage al montar
-  useEffect(()=>{
+  // Inicializar con datos de localStorage directamente
+  const [items, setItems] = useState(() => {
     try {
       const stored = localStorage.getItem('cart')
-      if(stored) setItems(JSON.parse(stored))
-    } catch(e){ console.error('Error cargando carrito:', e) }
-  },[])
+      return stored ? JSON.parse(stored) : []
+    } catch(e) {
+      console.error('Error cargando carrito:', e)
+      return []
+    }
+  })
 
   // Guardar carrito en localStorage cuando cambie
   useEffect(()=>{
