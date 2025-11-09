@@ -1,0 +1,13 @@
+node_modules
+client/node_modules
+dist
+build
+.git
+.gitignore
+Dockerfile*
+*.log
+.env
+.env.*
+.vscode
+coverage
+**/.cache

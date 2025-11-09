@@ -4,6 +4,9 @@ import { BrowserRouter } from 'react-router-dom'
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import App from './App'
 import { AuthProvider } from './context/AuthContext'
+import { CartProvider } from './context/CartContext'
+import { SocketProvider } from './context/SocketContext'
+import ChatWidget from './components/ChatWidget'
 
 const theme = extendTheme({
   fonts: { heading: 'Lora, serif', body: 'Inter, system-ui, sans-serif' },
@@ -39,7 +42,12 @@ createRoot(document.getElementById('root')).render(
     <ChakraProvider theme={theme}>
       <BrowserRouter>
         <AuthProvider>
-          <App />
+          <SocketProvider>
+            <CartProvider>
+              <App />
+              <ChatWidget />
+            </CartProvider>
+          </SocketProvider>
         </AuthProvider>
       </BrowserRouter>
     </ChakraProvider>
