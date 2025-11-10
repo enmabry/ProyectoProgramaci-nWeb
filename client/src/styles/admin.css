@@ -1,1 +1,4 @@
-.admin-wrapper{background:linear-gradient(180deg,rgba(255,255,255,0.5),#fff 100px);min-height:100vh}
+.admin-wrapper {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), #fff 100px);
+    min-height: 100vh
+}
