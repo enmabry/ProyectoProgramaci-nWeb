@@ -186,17 +186,6 @@ Abre `http://localhost:3000`.
 
 > En la **Collection** pon autorización de tipo **Bearer Token** = `{{token}}` para no repetirlo en cada request.
 
----
-
-## 🛫 Despliegue
-
-- **Backend + frontend juntos** en **Render/Railway/Fly** (recomendado).  
-  - Variables: `MONGO_URI`, `JWT_SECRET`, `PORT` (usa el que provee el PaaS).
-- **MongoDB**: usa **Atlas M0** (gratis). Deja `0.0.0.0/0` durante dev; luego restringe.
-- **Netlify/Vercel** (solo frontend): separar backend en un PaaS y configurar CORS.
-
----
-
 ## ✅ Checklist (rúbrica)
 
 - [x] Autenticación JWT correcta (login/register/me)
