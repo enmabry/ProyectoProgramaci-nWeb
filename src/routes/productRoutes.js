@@ -2,6 +2,7 @@ const { Router } = require('express');
 const Product = require('../models/Product');
 const { authenticateJWT, authorizeRoles } = require('../middleware/authenticateJWT');
 const { upload, cloudinary } = require('../config/cloudinary');
+const careOptions = require('../config/careOptions');
 
 const router = Router();
 
@@ -77,11 +78,24 @@ async function buildPayloadFromBody(body, files){
   if (maybeBadges) payload.badges = maybeBadges;
 
   // Objeto care (light, watering, temp)
-  if (payload.care && typeof payload.care === 'string') {
-    try {
-      payload.care = JSON.parse(payload.care);
-    } catch {
-      // Si falla el parse, dejarlo como está
+  if (payload.care) {
+    if (typeof payload.care === 'string') {
+      try {
+        payload.care = JSON.parse(payload.care);
+      } catch {
+        // Si falla el parse, dejarlo como está
+      }
+    }
+    
+    // Mapear valores simples a objetos completos con careOptions
+    if (payload.care.light && typeof payload.care.light === 'string') {
+      payload.care.light = careOptions.light[payload.care.light] || careOptions.light.media;
+    }
+    if (payload.care.watering && typeof payload.care.watering === 'string') {
+      payload.care.watering = careOptions.watering[payload.care.watering] || careOptions.watering.medio;
+    }
+    if (payload.care.temp && typeof payload.care.temp === 'string') {
+      payload.care.temp = careOptions.temp[payload.care.temp] || careOptions.temp.moderado;
     }
   }
 

@@ -96,19 +96,6 @@ export default function ProductDetailPage() {
     const images = product.images?.length ? product.images : [{ url: '', public_id: '' }]
     const currentImage = images[selectedImage]?.url || ''
 
-    const careLabels = {
-        light: {
-            baja: 'Prefiere luz baja o sombra brillante (indirecta). Evita sol directo fuerte.',
-            media: 'Luz media filtrada. Cerca de una ventana brillante sin sol directo intenso.',
-            alta: 'Luz muy brillante o sol directo suave. Ideal ventanas orientadas al este.'
-        },
-        watering: {
-            poco: 'Riegos espaciados. Deja secar la capa superior antes de volver a hidratar.',
-            medio: 'Riego moderado. Mantén el sustrato ligeramente húmedo, no encharcado.',
-            frecuente: 'Necesita humedad constante. Revisa el sustrato seguido y evita que se seque.'
-        }
-    }
-
     return (
         <Box>
             <NavbarGlass />
@@ -235,17 +222,17 @@ export default function ProductDetailPage() {
                             <CareCard
                                 icon="light"
                                 title="Luz"
-                                description={careLabels.light[product.care?.light] || 'Luz media filtrada'}
+                                description={product.care?.light?.description || 'Luz media filtrada'}
                             />
                             <CareCard
                                 icon="water"
                                 title="Riego"
-                                description={careLabels.watering[product.care?.watering] || 'Riego moderado'}
+                                description={product.care?.watering?.description || 'Riego moderado'}
                             />
                             <CareCard
                                 icon="temp"
                                 title="Temperatura"
-                                description={product.care?.temp || '18–24°C estable, evita cambios bruscos y corrientes frías.'}
+                                description={product.care?.temp?.description || '18–24°C'}
                             />
                         </Flex>
                     </Box>

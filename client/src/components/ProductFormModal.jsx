@@ -9,6 +9,7 @@ import { MdClose, MdAdd } from 'react-icons/md'
 const CATEGORIES_OPTIONS = ['Interior', 'Exterior', 'Suculentas', 'Tropical', 'Cactus', 'Árbol', 'Medicinal', 'Palmeras']
 const LIGHT_OPTIONS = ['baja', 'media', 'alta']
 const WATERING_OPTIONS = ['poco', 'medio', 'frecuente']
+const TEMP_OPTIONS = ['fresco', 'moderado', 'calido']
 const SIZE_OPTIONS = ['S', 'M', 'L']
 
 export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
@@ -28,7 +29,7 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
     care: {
       light: 'media',
       watering: 'medio',
-      temp: ''
+      temp: 'moderado'
     },
     size: 'M',
     dimensions: '',
@@ -319,12 +320,15 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
 
                 <FormControl>
                   <FormLabel fontSize="sm">Temperatura</FormLabel>
-                  <Input
+                  <Select
                     value={formData.care.temp}
                     onChange={(e) => handleCareChange('temp', e.target.value)}
-                    placeholder="18–26°C"
                     size="sm"
-                  />
+                  >
+                    {TEMP_OPTIONS.map(opt => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </Select>
                 </FormControl>
               </Grid>
             </Box>

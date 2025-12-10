@@ -3,8 +3,8 @@ const mongoose = require('mongoose')
 const User = require('../models/User')
 
 const ADMIN_DATA = {
-  username: 'admin',
-  email: 'admin@aprioriverde.com',
+  username: 'admin1',
+  email: 'admin1@admin.com',
   password: 'Admin123',
   role: 'admin'
 }

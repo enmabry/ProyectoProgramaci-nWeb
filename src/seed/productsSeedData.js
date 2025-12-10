@@ -1,3 +1,5 @@
+const careOptions = require('../config/careOptions');
+
 module.exports = [
   {
     name: 'Monstera Deliciosa',
@@ -6,10 +8,14 @@ module.exports = [
     description: 'Planta tropical de interior con hojas grandes y perforadas. Ideal para luz media y ambientes húmedos.',
     price: 52000,
     compareAtPrice: 60000,
-  images: [ { url: 'https://source.unsplash.com/800x600/?monstera,plant' } ],
+    images: [ { url: 'https://source.unsplash.com/800x600/?monstera,plant' } ],
     categories: ['Interior','Tropical'],
     badges: ['nuevo','top'],
-    care: { light: 'media', watering: 'medio', temp: '18–26°C' },
+    care: {
+      light: careOptions.light.media,
+      watering: careOptions.watering.medio,
+      temp: careOptions.temp.calido
+    },
     size: 'L',
     dimensions: '60–90 cm',
     potRecommended: '25 cm diámetro',
@@ -26,10 +32,14 @@ module.exports = [
     description: 'Sus hojas grandes en forma de violín aportan elegancia a cualquier espacio luminoso indirecto.',
     price: 68000,
     compareAtPrice: 75000,
-  images: [ { url: 'https://source.unsplash.com/800x600/?ficus,plant' } ],
+    images: [ { url: 'https://source.unsplash.com/800x600/?ficus,plant' } ],
     categories: ['Interior','Árbol'],
     badges: ['top'],
-    care: { light: 'alta', watering: 'medio', temp: '20–28°C' },
+    care: {
+      light: careOptions.light.alta,
+      watering: careOptions.watering.medio,
+      temp: careOptions.temp.calido
+    },
     size: 'L',
     dimensions: '80–110 cm',
     potRecommended: '30 cm diámetro',
@@ -46,10 +56,14 @@ module.exports = [
     description: 'Planta extremadamente resistente que tolera baja luz y riegos espaciados. Purifica el aire.',
     price: 32000,
     compareAtPrice: 38000,
-  images: [ { url: 'https://source.unsplash.com/800x600/?sansevieria,plant' } ],
+    images: [ { url: 'https://source.unsplash.com/800x600/?sansevieria,plant' } ],
     categories: ['Interior','Suculentas'],
     badges: ['facil'],
-    care: { light: 'baja', watering: 'poco', temp: '15–30°C' },
+    care: {
+      light: careOptions.light.baja,
+      watering: careOptions.watering.poco,
+      temp: careOptions.temp.calido
+    },
     size: 'M',
     dimensions: '35–50 cm',
     potRecommended: '18 cm diámetro',
@@ -65,10 +79,14 @@ module.exports = [
     shortDesc: 'Planta del dinero china',
     description: 'Hojas redondas y verdes sobre tallos delgados. Crecimiento rápido con luz brillante filtrada.',
     price: 28000,
-  images: [ { url: 'https://source.unsplash.com/800x600/?pilea,plant' } ],
+    images: [ { url: 'https://source.unsplash.com/800x600/?pilea,plant' } ],
     categories: ['Interior'],
     badges: ['nuevo'],
-    care: { light: 'media', watering: 'medio', temp: '16–24°C' },
+    care: {
+      light: careOptions.light.media,
+      watering: careOptions.watering.medio,
+      temp: careOptions.temp.moderado
+    },
     size: 'S',
     dimensions: '20–30 cm',
     potRecommended: '14 cm diámetro',
@@ -84,10 +102,14 @@ module.exports = [
     shortDesc: 'Follaje con bandas plateadas',
     description: 'Requiere humedad y luz indirecta. Sus hojas anchas con franjas plateadas son muy decorativas.',
     price: 45000,
-  images: [ { url: 'https://source.unsplash.com/800x600/?calathea,plant' } ],
+    images: [ { url: 'https://source.unsplash.com/800x600/?calathea,plant' } ],
     categories: ['Interior','Tropical'],
     badges: ['exotica'],
-    care: { light: 'media', watering: 'frecuente', temp: '18–26°C' },
+    care: {
+      light: careOptions.light.media,
+      watering: careOptions.watering.frecuente,
+      temp: careOptions.temp.calido
+    },
     size: 'M',
     dimensions: '40–55 cm',
     potRecommended: '20 cm diámetro',
@@ -103,10 +125,14 @@ module.exports = [
     shortDesc: 'Colección de suculentas variadas',
     description: 'Pack de 4 suculentas seleccionadas que requieren muy poco riego y buena luz.',
     price: 25000,
-  images: [ { url: 'https://source.unsplash.com/800x600/?succulent,succulents' } ],
+    images: [ { url: 'https://source.unsplash.com/800x600/?succulent,succulents' } ],
     categories: ['Interior','Suculentas'],
     badges: ['pack'],
-    care: { light: 'alta', watering: 'poco', temp: '18–30°C' },
+    care: {
+      light: careOptions.light.alta,
+      watering: careOptions.watering.poco,
+      temp: careOptions.temp.calido
+    },
     size: 'S',
     dimensions: '10–15 cm',
     potRecommended: 'Macetas pequeñas 8-10 cm',
@@ -122,10 +148,14 @@ module.exports = [
     shortDesc: 'Gel medicinal natural',
     description: 'Suculenta famosa por su gel. Requiere luz brillante y riegos moderados.',
     price: 21000,
-  images: [ { url: 'https://source.unsplash.com/800x600/?aloe,vera' } ],
+    images: [ { url: 'https://source.unsplash.com/800x600/?aloe,vera' } ],
     categories: ['Interior','Suculentas','Medicinal'],
     badges: ['medicinal'],
-    care: { light: 'alta', watering: 'poco', temp: '18–32°C' },
+    care: {
+      light: careOptions.light.alta,
+      watering: careOptions.watering.poco,
+      temp: careOptions.temp.calido
+    },
     size: 'M',
     dimensions: '30–45 cm',
     potRecommended: '16 cm diámetro',
@@ -141,10 +171,14 @@ module.exports = [
     shortDesc: 'Flores espectaculares nocturnas',
     description: 'Cactus que produce grandes flores nocturnas. Muy fácil de cuidar con luz directa.',
     price: 19000,
-  images: [ { url: 'https://source.unsplash.com/800x600/?cactus,echinopsis' } ],
+    images: [ { url: 'https://source.unsplash.com/800x600/?cactus,echinopsis' } ],
     categories: ['Interior','Suculentas','Cactus'],
     badges: ['flor'],
-    care: { light: 'alta', watering: 'poco', temp: '15–30°C' },
+    care: {
+      light: careOptions.light.alta,
+      watering: careOptions.watering.poco,
+      temp: careOptions.temp.calido
+    },
     size: 'S',
     dimensions: '12–18 cm',
     potRecommended: '12 cm diámetro',
@@ -160,10 +194,14 @@ module.exports = [
     shortDesc: 'Follaje frondoso y colgante',
     description: 'Necesita humedad y riegos frecuentes. Perfecto para colgar en espacios luminosos indirectos.',
     price: 26000,
-  images: [ { url: 'https://source.unsplash.com/800x600/?fern,plant' } ],
+    images: [ { url: 'https://source.unsplash.com/800x600/?fern,plant' } ],
     categories: ['Interior','Tropical'],
     badges: ['colgante'],
-    care: { light: 'media', watering: 'frecuente', temp: '16–24°C' },
+    care: {
+      light: careOptions.light.media,
+      watering: careOptions.watering.frecuente,
+      temp: careOptions.temp.moderado
+    },
     size: 'M',
     dimensions: '35–50 cm',
     potRecommended: '18 cm diámetro',
@@ -179,10 +217,14 @@ module.exports = [
     shortDesc: 'Tronco estilizado y hojas finas',
     description: 'Planta de interior muy adaptable. Tolera luz media y riegos moderados.',
     price: 39000,
-  images: [ { url: 'https://source.unsplash.com/800x600/?dracaena,plant' } ],
+    images: [ { url: 'https://source.unsplash.com/800x600/?dracaena,plant' } ],
     categories: ['Interior','Árbol'],
     badges: ['clasica'],
-    care: { light: 'media', watering: 'medio', temp: '18–26°C' },
+    care: {
+      light: careOptions.light.media,
+      watering: careOptions.watering.medio,
+      temp: careOptions.temp.moderado
+    },
     size: 'L',
     dimensions: '70–95 cm',
     potRecommended: '24 cm diámetro',
