@@ -2,3 +2,21 @@
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), #fff 100px);
     min-height: 100vh
 }
+
+.admin-table-container {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    overflow-x: auto;
+}
+
+.admin-table-row:hover {
+    background: #f7f7f7;
+}
+
+.admin-placeholder-box {
+    width: 50px;
+    height: 50px;
+    background: #e2e8f0;
+    border-radius: 0.375rem;
+}

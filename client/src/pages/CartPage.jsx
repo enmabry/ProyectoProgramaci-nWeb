@@ -112,7 +112,7 @@ export default function CartPage(){
             </VStack>
 
             {/* Resumen */}
-            <Box bg="white" p={6} borderRadius="lg" boxShadow="md" h="fit-content" position="sticky" top="140px">
+            <Box className="cart-summary">
               <Heading size="md" mb={4}>Resumen del pedido</Heading>
               <VStack spacing={3} align="stretch">
                 <Flex justify="space-between">

@@ -89,6 +89,12 @@
     flex-direction: column
 }
 
+.product-card:hover {
+    transform: scale(1.03);
+    transition: transform 0.2s;
+    text-decoration: none;
+}
+
 .product-card__media {
     background: #f7f7f7;
     padding: 0.5rem
@@ -127,6 +133,12 @@
     overflow: hidden;
     background: linear-gradient(135deg, #e0ebe4, #91bb9d);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08)
+}
+
+.category-card:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s;
+    text-decoration: none;
 }
 
 .category-card__overlay {
@@ -242,4 +254,23 @@
     outline: none;
     box-shadow: 0 0 0 2px rgba(60, 129, 87, .35);
     border-radius: 6px
+}
+
+/* Estilos para About Page */
+.about-page {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), #fff 100px);
+}
+
+.about-heading {
+    margin-bottom: 1.5rem;
+}
+
+.about-text-block {
+    line-height: 1.6;
+    font-size: 0.875rem;
+}
+
+.about-image {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }

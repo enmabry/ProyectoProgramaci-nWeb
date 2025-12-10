@@ -25,10 +25,10 @@ function CareIcon({ type }) {
 
 function CareCard({ icon, title, description }) {
     return (
-        <VStack spacing={2} align="center" p={4} bg="gray.50" borderRadius="lg" flex={1}>
-            <CareIcon type={icon} />
-            <Text fontWeight="700" fontSize="sm" textAlign="center">{title}</Text>
-            <Text fontSize="xs" color="gray.600" textAlign="center">{description}</Text>
+        <VStack className="care-card">
+            <CareIcon type={icon} className="care-card__icon" />
+            <Text className="care-card__title">{title}</Text>
+            <Text className="care-card__description">{description}</Text>
         </VStack>
     )
 }
@@ -229,7 +229,7 @@ export default function ProductDetailPage() {
                     </Grid>
 
                     {/* Guía de Cuidados */}
-                    <Box mt={10} p={6} bg="white" borderRadius="lg" boxShadow="sm">
+                    <Box className="product-detail-section">
                         <Heading as="h3" size="md" mb={6}>Guía de Cuidados</Heading>
                         <Flex gap={4} direction={{ base: 'column', md: 'row' }}>
                             <CareCard
@@ -251,14 +251,14 @@ export default function ProductDetailPage() {
                     </Box>
 
                     {/* Descripción completa */}
-                    <Box mt={8} p={6} bg="white" borderRadius="lg" boxShadow="sm">
+                    <Box className="product-detail-section">
                         <Heading as="h3" size="md" mb={4}>Descripción</Heading>
                         <Text color="gray.700" lineHeight={1.7}>{product.description || 'Sin descripción disponible.'}</Text>
                     </Box>
 
                     {/* Dimensiones y Maceta */}
                     {(product.dimensions || product.potRecommended) && (
-                        <Box mt={8} p={6} bg="white" borderRadius="lg" boxShadow="sm">
+                        <Box className="product-detail-section">
                             <Heading as="h3" size="md" mb={4}>Dimensiones y Maceta</Heading>
                             <VStack align="stretch" spacing={2}>
                                 {product.dimensions && (

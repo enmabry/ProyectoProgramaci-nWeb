@@ -8,11 +8,12 @@ export default function AboutPage() {
   return (
     <>
       <NavbarGlass />
+      <Box className="about-page">
       <Container maxW="5xl" py={12} mt={20}>
       <VStack align="start" spacing={10}>
         <Box>
-          <Heading as="h1" size="lg" mb={6}>Nuestra Historia</Heading>
-          <VStack align="start" spacing={4} fontSize="sm" lineHeight={1.6}>
+          <Heading as="h1" size="lg" mb={6} className="about-heading">Nuestra Historia</Heading>
+          <VStack align="start" spacing={4} fontSize="sm" lineHeight={1.6} className="about-text-block">
             <Text>
               A Priori Verde nació de una intuición sencilla: el gusto por lo vivo se cultiva. Empezamos en un piso pequeño, 
               rodeados de macetas, cuadernos y pruebas de sustratos. Entre cafés y trasplantes nos preguntamos cómo ayudar a que cualquier hogar —aun sin experiencia— pudiera reconocer la belleza de una planta y cuidarla con criterio. No queríamos vender “cosas verdes”, sino enseñar a mirar lo vivo.
@@ -34,7 +35,7 @@ export default function AboutPage() {
           <Text fontSize="sm" mb={4} color="gray.600">
             Un recorrido visual por el proceso: exploración conceptual, refinamiento y versión final.
           </Text>
-          <Image src={LogosEvolucion} alt="Evolución del logo" borderRadius="lg" shadow="md" />
+          <Image src={LogosEvolucion} alt="Evolución del logo" className="about-image" />
         </Box>
 
         <Box w="full">
@@ -42,10 +43,11 @@ export default function AboutPage() {
           <Text fontSize="sm" mb={4} color="gray.600">
             Nuestra identidad cromática: tonos tierra y verdes que transmiten calma, frescura y conexión viva.
           </Text>
-          <Image src={PaletaColores} alt="Paleta de colores" borderRadius="lg" shadow="md" />
+          <Image src={PaletaColores} alt="Paleta de colores" className="about-image" />
         </Box>
       </VStack>
     </Container>
+    </Box>
     </>
   )
 }

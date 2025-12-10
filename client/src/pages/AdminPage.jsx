@@ -114,7 +114,7 @@ function ProductsTab(){
         </Button>
       </HStack>
       
-      <Box bg="white" borderRadius="lg" boxShadow="sm" overflowX="auto">
+      <Box bg="white" borderRadius="lg" boxShadow="sm" overflowX="auto" className="admin-table-container">
         {loading ? (
           <Box p={6}>
             {Array.from({length:5}).map((_,i)=>(
@@ -142,7 +142,7 @@ function ProductsTab(){
             </Thead>
             <Tbody>
               {products.map(product => (
-                <Tr key={product._id} _hover={{ bg:'gray.50' }}>
+                <Tr key={product._id} className="admin-table-row">
                   <Td>
                     {product.images?.[0]?.url ? (
                       <Image 
@@ -153,7 +153,7 @@ function ProductsTab(){
                         borderRadius="md"
                       />
                     ) : (
-                      <Box boxSize="50px" bg="gray.200" borderRadius="md" />
+                      <Box className="admin-placeholder-box" />
                     )}
                   </Td>
                   <Td>

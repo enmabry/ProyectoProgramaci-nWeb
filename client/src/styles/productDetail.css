@@ -64,3 +64,38 @@
     height: 100%;
     width: 100%
 }
+
+.care-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 1rem;
+    background: #f7f7f7;
+    border-radius: 0.5rem;
+    flex: 1;
+}
+
+.care-card__icon {
+    font-size: 2rem;
+}
+
+.care-card__title {
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.care-card__description {
+    font-size: 0.75rem;
+    color: #718096;
+    text-align: center;
+}
+
+.product-detail-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}

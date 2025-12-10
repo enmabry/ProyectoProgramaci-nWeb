@@ -41,7 +41,6 @@ function ProductCard({ product }){
       to={`/product/${product.slug}`} 
       className="product-card" 
       overflow="hidden"
-      _hover={{ transform:'scale(1.03)', transition:'transform 0.2s', textDecoration:'none' }}
     >
       <Box className="product-card__media">
         {product?.images?.[0]?.url ? (
@@ -101,7 +100,7 @@ function Categories(){
       <Heading size="md" mb={4}>Explora nuestras categorías</Heading>
       <SimpleGrid columns={{ base:1, md:4 }} spacing={5}>
         {cats.map(c => (
-          <Box key={c.key} as={Link} to={`/catalog?category=${encodeURIComponent(c.key)}`} className="category-card" _hover={{ transform:'scale(1.02)', transition:'transform 0.2s' }}>
+          <Box key={c.key} as={Link} to={`/catalog?category=${encodeURIComponent(c.key)}`} className="category-card">
             <Box className="category-card__overlay" />
             <Flex className="category-card__content" align="center" justify="center">
               <Heading size="sm" className="category-card__title">{c.label}</Heading>
