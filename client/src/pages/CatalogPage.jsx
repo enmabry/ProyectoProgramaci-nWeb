@@ -18,7 +18,6 @@ function ProductTile({ p }){
       as={Link} 
       to={`/product/${p.slug}`} 
       className="catalog-card"
-      _hover={{ transform:'scale(1.03)', transition:'transform 0.2s', textDecoration:'none' }}
     >
       <Box className="catalog-card__media">
         {p.images?.[0]?.url ? (

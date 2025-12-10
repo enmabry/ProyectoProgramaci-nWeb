@@ -7,3 +7,13 @@
     align-items: center;
     justify-content: center
 }
+
+.cart-summary {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+    position: sticky;
+    top: 140px;
+}

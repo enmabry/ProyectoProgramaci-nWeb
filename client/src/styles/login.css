@@ -87,3 +87,43 @@
     padding: 2rem;
   }
 }
+
+/* Panel derecho del login con fondo e imagen */
+.login-right-panel {
+  flex-basis: 0;
+  flex-grow: 0.9;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+@media (min-width: 48em) {
+  .login-right-panel {
+    display: flex;
+  }
+}
+
+/* Overlay de texto en el panel derecho */
+.login-right-panel__text {
+  position: absolute;
+  left: 3rem;
+  right: 3rem;
+  bottom: 3rem;
+  color: #f0f4f0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.login-right-panel__quote {
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.login-right-panel__author {
+  font-size: 0.875rem;
+  color: #c6e8d0;
+}

@@ -20,7 +20,11 @@ services:
     env_file: .env
     environment:
       PORT: 3000
-      MONGO_URI: mongodb://mongo:27017/aprioriverde
+      # MONGO_URI puede apuntar a un Mongo local (por defecto) o a MongoDB Atlas.
+      # Para usar Atlas, define MONGO_URI en el archivo .env o como variable de entorno
+      # Ejemplo (env): MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/product_portal
+      # El valor por defecto apunta al servicio `mongo` definido en este compose.
+      MONGO_URI: mongodb+srv://bryan-baquedano:Bry123456789@cluster0.b2r1gxg.mongodb.net/product_portal?retryWrites=true&w=majority&appName=Cluster0
     depends_on:
       - mongo
     ports:

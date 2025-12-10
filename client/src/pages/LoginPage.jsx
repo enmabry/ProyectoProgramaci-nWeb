@@ -148,19 +148,12 @@ export default function LoginPage(){
 
       {/* Lado derecho: panel visual a pantalla completa */}
       <Flex
-        flex="0.9"
-        display={{ base:'none', md:'flex' }}
-        align="center"
-        justify="center"
-        position="relative"
-        bgImage={`linear-gradient(rgba(18,38,24,0.55), rgba(18,38,24,0.55)), url(${fondoPanel})`}
-        bgSize="cover"
-        bgPosition="center"
-        bgRepeat="no-repeat"
+        className="login-right-panel"
+        style={{ backgroundImage: `linear-gradient(rgba(18,38,24,0.55), rgba(18,38,24,0.55)), url(${fondoPanel})` }}
       >
-        <Box position="absolute" left="12" right="12" bottom="12" color="brand.50" textShadow="0 1px 3px rgba(0,0,0,0.6)">
-          <Text fontWeight="semibold" fontSize={{ base: 'md', lg: 'lg' }}>“Llega a ser quien eres.”</Text>
-          <Text fontSize="sm" color="brand.200">— Nietzsche</Text>
+        <Box className="login-right-panel__text">
+          <Text className="login-right-panel__quote">"Llega a ser quien eres."</Text>
+          <Text className="login-right-panel__author">— Nietzsche</Text>
         </Box>
       </Flex>
     </Flex>

@@ -12,6 +12,7 @@ Aplicación web de e‑commerce de plantas con panel de administración, carrito
 - Chat en tiempo real con Socket.IO (widget de usuario y bandeja de admin)
 - Docker Compose para levantar MongoDB, API y Frontend
 
+
 ## Stack
 
 - Backend: Node.js + Express, Mongoose/MongoDB, Multer + Cloudinary, Socket.IO
@@ -185,17 +186,6 @@ Abre `http://localhost:3000`.
 
 > En la **Collection** pon autorización de tipo **Bearer Token** = `{{token}}` para no repetirlo en cada request.
 
----
-
-## 🛫 Despliegue
-
-- **Backend + frontend juntos** en **Render/Railway/Fly** (recomendado).  
-  - Variables: `MONGO_URI`, `JWT_SECRET`, `PORT` (usa el que provee el PaaS).
-- **MongoDB**: usa **Atlas M0** (gratis). Deja `0.0.0.0/0` durante dev; luego restringe.
-- **Netlify/Vercel** (solo frontend): separar backend en un PaaS y configurar CORS.
-
----
-
 ## ✅ Checklist (rúbrica)
 
 - [x] Autenticación JWT correcta (login/register/me)
@@ -214,12 +204,6 @@ Abre `http://localhost:3000`.
 - **`401 Token inválido`**: envía `Authorization: Bearer <token>` y verifica `JWT_SECRET` en prod/dev.
 - **CORS**: si separas front y back, activa `cors()` y define `origin` si hace falta.
 - **Sockets**: el cliente debe enviar `auth: { token }`; en el server, valida con `io.use(...)` + `jwt.verify`.
-
----
-
-## 📜 Licencia
-Uso académico/educativo. Adáptalo libremente para tus prácticas.
-
 ---
 
 ### 🌱 Nombre del proyecto
