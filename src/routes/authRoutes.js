@@ -21,6 +21,29 @@ const authLimiter = rateLimit({
   message: { error: 'Demasiados intentos, espera unos minutos.', code: 'RATE_LIMIT' }
 });
 
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Registrar nuevo usuario
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username: { type: string }
+ *               email: { type: string }
+ *               password: { type: string }
+ *               role: { type: string, default: 'user' }
+ *     responses:
+ *       200:
+ *         description: Usuario registrado exitosamente
+ *       400:
+ *         description: Usuario o email ya registrado
+ */
 router.post('/register', authLimiter, async (req,res)=>{
   try{
     const { username, email, password, role } = req.body;
@@ -31,6 +54,27 @@ router.post('/register', authLimiter, async (req,res)=>{
   }catch(e){ res.status(400).json({ error: e.message, code: 'REGISTER_ERROR' }); }
 });
 
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Iniciar sesión
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email: { type: string }
+ *               password: { type: string }
+ *     responses:
+ *       200:
+ *         description: Sesión iniciada exitosamente
+ *       400:
+ *         description: Credenciales inválidas
+ */
 router.post('/login', authLimiter, async (req,res)=>{
   try{
     const { email, password } = req.body;
@@ -55,6 +99,20 @@ router.post('/login', authLimiter, async (req,res)=>{
   }catch(e){ res.status(400).json({ error: e.message, code: 'LOGIN_ERROR' }); }
 });
 
+/**
+ * @swagger
+ * /api/auth/me:
+ *   get:
+ *     summary: Obtener usuario actual del token
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Usuario decodificado del token
+ *       401:
+ *         description: Token inválido o expirado
+ */
 router.get('/me', (req,res)=>{
   try{
     const auth = req.headers['authorization'] || '';
@@ -70,7 +128,20 @@ router.get('/me', (req,res)=>{
   }
 });
 
-// Perfil completo desde DB (requiere auth)
+/**
+ * @swagger
+ * /api/auth/profile:
+ *   get:
+ *     summary: Obtener perfil completo del usuario
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Perfil completo del usuario
+ *       404:
+ *         description: Usuario no encontrado
+ */
 router.get('/profile', authenticateJWT, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -79,6 +150,22 @@ router.get('/profile', authenticateJWT, async (req, res) => {
   } catch (e) {
     res.status(400).json({ error: e.message, code: 'PROFILE_ERROR' });
   }
+});
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Cerrar sesión (endpoint sin efecto, token se invalida en cliente)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Sesión cerrada exitosamente
+ */
+router.post('/logout', authenticateJWT, (req, res) => {
+  res.json({ message: 'Sesión cerrada exitosamente', code: 'LOGOUT_OK' });
 });
 
 // --- Reset de contraseña ---
@@ -118,6 +205,26 @@ async function buildTransport(){
 // Inicializar transport de forma async (para Ethereal)
 (async () => { transporter = await buildTransport(); })();
 
+/**
+ * @swagger
+ * /api/auth/forgot:
+ *   post:
+ *     summary: Solicitar reset de contraseña
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email: { type: string }
+ *     responses:
+ *       200:
+ *         description: Email de reset enviado (o token en dev mode)
+ *       404:
+ *         description: Usuario no encontrado
+ */
 router.post('/forgot', async (req, res) => {
   try {
     const { email } = req.body;
@@ -162,6 +269,27 @@ router.post('/forgot', async (req, res) => {
 });
 
 // Confirmar reset: requiere token y nueva contraseña
+/**
+ * @swagger
+ * /api/auth/reset:
+ *   post:
+ *     summary: Confirmar reset de contraseña
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token: { type: string }
+ *               password: { type: string }
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada exitosamente
+ *       400:
+ *         description: Token inválido o expirado
+ */
 router.post('/reset', async (req, res) => {
   try {
     const { token, password } = req.body;

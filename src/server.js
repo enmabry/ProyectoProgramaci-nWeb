@@ -7,6 +7,8 @@ const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./config/swagger');
 
 const { MONGO_URI, PORT = 3000, JWT_SECRET = 'dev' } = process.env;
 
@@ -24,6 +26,10 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(require('path').join(__dirname, 'public')));
+
+// --- Swagger ---
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+console.log('📚 Swagger disponible en: http://localhost:3000/api-docs');
 
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');

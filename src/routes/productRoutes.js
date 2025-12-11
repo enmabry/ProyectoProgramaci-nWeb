@@ -6,6 +6,23 @@ const careOptions = require('../config/careOptions');
 
 const router = Router();
 
+/**
+ * @swagger
+ * /api/products/slug/{slug}:
+ *   get:
+ *     summary: Obtener producto por slug
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Producto encontrado
+ *       404:
+ *         description: Producto no encontrado
+ */
 // GET por slug (detalle de producto)
 router.get('/slug/:slug', async (req, res) => {
   try {
@@ -17,6 +34,29 @@ router.get('/slug/:slug', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/products:
+ *   get:
+ *     summary: Listar todos los productos
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema: { type: string }
+ *       - in: query
+ *         name: minPrice
+ *         schema: { type: number }
+ *       - in: query
+ *         name: maxPrice
+ *         schema: { type: number }
+ *       - in: query
+ *         name: sort
+ *         schema: { type: string, enum: ['price-asc', 'price-desc', 'newest'] }
+ *     responses:
+ *       200:
+ *         description: Lista de productos
+ */
 // GET todos los productos (con filtros opcionales)
 router.get('/', async (req, res) => {
   try {
@@ -43,6 +83,23 @@ router.get('/', async (req, res) => {
 });
 
 // GET producto por ID
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   get:
+ *     summary: Obtener producto por ID
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Producto encontrado
+ *       404:
+ *         description: Producto no encontrado
+ */
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -52,6 +109,87 @@ router.get('/:id', async (req, res) => {
     res.status(400).json({ error: e.message });
   }
 });
+
+/**
+ * @swagger
+ * /api/products:
+ *   post:
+ *     summary: Crear nuevo producto (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string, description: 'Nombre del producto' }
+ *               slug: { type: string, description: 'URL slug único' }
+ *               price: { type: number, description: 'Precio en pesos' }
+ *               stock: { type: number, description: 'Cantidad disponible' }
+ *               care: { type: string, description: 'JSON con luz, riego, temperatura' }
+ *               images: { type: array, items: { type: string, format: binary } }
+ *     responses:
+ *       201:
+ *         description: Producto creado exitosamente
+ *       400:
+ *         description: Error en validación
+ *       401:
+ *         description: No autorizado
+ */
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   put:
+ *     summary: Actualizar producto (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string }
+ *               price: { type: number }
+ *               stock: { type: number }
+ *               care: { type: string }
+ *               images: { type: array, items: { type: string, format: binary } }
+ *     responses:
+ *       200:
+ *         description: Producto actualizado
+ *       404:
+ *         description: Producto no encontrado
+ *       401:
+ *         description: No autorizado
+ *
+ *   delete:
+ *     summary: Eliminar producto (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Producto eliminado exitosamente
+ *       404:
+ *         description: Producto no encontrado
+ *       401:
+ *         description: No autorizado
+ */
 
 // Helper para castear y parsear campos desde multipart/form-data o JSON
 async function buildPayloadFromBody(body, files){
@@ -164,6 +302,30 @@ router.put('/:id', authenticateJWT, authorizeRoles('admin'), upload.array('image
 });
 
 // Ruta utilitaria: subir solo una imagen y devolver URL (solo admin)
+/**
+ * @swagger
+ * /api/products/upload:
+ *   post:
+ *     summary: Subir imagen a Cloudinary (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image: { type: string, format: binary }
+ *     responses:
+ *       200:
+ *         description: Imagen subida exitosamente
+ *       400:
+ *         description: No se recibió imagen
+ *       401:
+ *         description: No autorizado
+ */
 router.post('/upload', authenticateJWT, authorizeRoles('admin'), upload.single('image'), async (req, res) => {
   try {
     if (!req.file?.path) return res.status(400).json({ error: 'No se recibió imagen' });
@@ -174,6 +336,30 @@ router.post('/upload', authenticateJWT, authorizeRoles('admin'), upload.single('
 });
 
 // Subir imagen desde URL y devolver {url, public_id}
+/**
+ * @swagger
+ * /api/products/upload/url:
+ *   post:
+ *     summary: Subir imagen desde URL a Cloudinary (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               url: { type: string, description: 'URL de la imagen a subir' }
+ *     responses:
+ *       200:
+ *         description: Imagen subida exitosamente desde URL
+ *       400:
+ *         description: URL no proporcionada o error en subida
+ *       401:
+ *         description: No autorizado
+ */
 router.post('/upload/url', authenticateJWT, authorizeRoles('admin'), async (req, res) => {
   try {
     const url = req.body.url || req.body.imageUrl;
@@ -208,6 +394,37 @@ router.delete('/:id', authenticateJWT, authorizeRoles('admin'), async (req, res)
 
 // DELETE imágenes específicas del producto (solo admin)
 // Body JSON: { publicIds: ["products/abc123", "products/xyz456"] }
+/**
+ * @swagger
+ * /api/products/{id}/images/delete:
+ *   post:
+ *     summary: Eliminar imágenes específicas de un producto (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               publicIds: { type: array, items: { type: string }, description: 'IDs de Cloudinary a eliminar' }
+ *     responses:
+ *       200:
+ *         description: Imágenes eliminadas exitosamente
+ *       400:
+ *         description: publicIds requerido o vacío
+ *       404:
+ *         description: Producto no encontrado
+ *       401:
+ *         description: No autorizado
+ */
 router.post('/:id/images/delete', authenticateJWT, authorizeRoles('admin'), async (req, res) => {
   try {
     const { publicIds } = req.body;

@@ -4,6 +4,32 @@ const { authenticateJWT } = require('../middleware/authenticateJWT');
 
 const router = Router();
 
+/**
+ * @swagger
+ * /api/orders/checkout:
+ *   post:
+ *     summary: Procesar pago y actualizar stock
+ *     tags: [Orders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     productId: { type: string }
+ *                     quantity: { type: number }
+ *     responses:
+ *       200:
+ *         description: Pago procesado exitosamente
+ *       400:
+ *         description: Stock insuficiente o datos inválidos
+ */
 // POST - Procesar pago y actualizar stock
 // Esperamos un array de items: [{ productId, quantity }, ...]
 router.post('/checkout', async (req, res) => {
@@ -54,6 +80,29 @@ router.post('/checkout', async (req, res) => {
 });
 
 // GET - Obtener productos con stock > 0 (para catálogo)
+/**
+ * @swagger
+ * /api/orders/available:
+ *   get:
+ *     summary: Obtener productos con stock disponible
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema: { type: string }
+ *       - in: query
+ *         name: minPrice
+ *         schema: { type: number }
+ *       - in: query
+ *         name: maxPrice
+ *         schema: { type: number }
+ *       - in: query
+ *         name: sort
+ *         schema: { type: string, enum: ['price-asc', 'price-desc', 'newest'] }
+ *     responses:
+ *       200:
+ *         description: Lista de productos con stock > 0
+ */
 router.get('/available', async (req, res) => {
   try {
     const { category, minPrice, maxPrice, sort } = req.query;
