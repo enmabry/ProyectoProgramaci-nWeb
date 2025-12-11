@@ -45,7 +45,7 @@ export default function CatalogPage(){
   // Usamos precio máximo en miles (K). 80 => 80.00 equivale a 80.000 COP
   const [priceMaxK,setPriceMaxK] = useState(80)
   const [page,setPage] = useState(1)
-  const pageSize = 9
+  const pageSize = 8
 
   // Aplicar filtro de categoría desde query params al montar
   useEffect(()=>{
@@ -138,7 +138,7 @@ export default function CatalogPage(){
               </SimpleGrid>
             ) : (
               <>
-                <SimpleGrid columns={{ base:2, md:3, xl:4 }} spacing={5} mb={8}>
+                <SimpleGrid columns={{ base:2, md:4, xl:4 }} spacing={5} mb={8}>
                   {pageItems.map(p=> <ProductTile key={p._id} p={p} />)}
                   {!pageItems.length && <Text fontSize='sm' color='gray.500'>Sin resultados con los filtros actuales.</Text>}
                 </SimpleGrid>

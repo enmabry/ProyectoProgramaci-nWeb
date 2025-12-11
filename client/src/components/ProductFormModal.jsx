@@ -97,7 +97,8 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
 
   const handleImageFilesChange = (e) => {
     const files = Array.from(e.target.files)
-    setImageFiles(files)
+    // Solo tomar el primer archivo
+    setImageFiles(files.slice(0, 1))
   }
 
   const handleSubmit = async () => {
@@ -137,17 +138,15 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
       formDataToSend.append('stock', formData.stock || 0)
       formDataToSend.append('isFeatured', formData.isFeatured)
 
-      // Si es edición, preservar imágenes existentes
-      if (product && product.images && product.images.length > 0) {
-        formDataToSend.append('existingImages', JSON.stringify(product.images))
+      // No preservar imágenes existentes - reemplazarlas con la nueva
+      // Solo enviar la nueva imagen si se proporciona
+
+      // Imagen de archivo nuevo
+      if (imageFiles.length > 0) {
+        formDataToSend.append('images', imageFiles[0])
       }
 
-      // Imágenes de archivos nuevos
-      imageFiles.forEach(file => {
-        formDataToSend.append('images', file)
-      })
-
-      // URLs de imágenes nuevas
+      // URL de imagen nueva
       if (imageUrls.trim()) {
         formDataToSend.append('imageUrls', imageUrls.trim())
       }
@@ -395,52 +394,45 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
 
             {/* Imágenes */}
             <Box p={4} bg="gray.50" borderRadius="md">
-              <Text fontWeight="600" mb={3} fontSize="sm">Imágenes del producto</Text>
+              <Text fontWeight="600" mb={3} fontSize="sm">Imagen del producto</Text>
               
               <FormControl mb={3}>
-                <FormLabel fontSize="sm">Subir archivos (máx 8)</FormLabel>
+                <FormLabel fontSize="sm">Subir imagen (JPG, PNG, etc.)</FormLabel>
                 <Input
                   type="file"
-                  multiple
                   accept="image/*"
                   onChange={handleImageFilesChange}
                   size="sm"
                 />
                 {imageFiles.length > 0 && (
                   <Text fontSize="xs" color="gray.600" mt={1}>
-                    {imageFiles.length} archivo(s) seleccionado(s)
+                    1 imagen seleccionada
                   </Text>
                 )}
               </FormControl>
 
               <FormControl>
-                <FormLabel fontSize="sm">O pegar URLs de imágenes (una por línea)</FormLabel>
-                <Textarea
+                <FormLabel fontSize="sm">O pegar URL de imagen</FormLabel>
+                <Input
                   value={imageUrls}
                   onChange={(e) => setImageUrls(e.target.value)}
-                  placeholder="https://example.com/image1.jpg"
-                  rows={3}
+                  placeholder="https://example.com/image.jpg"
                   size="sm"
                 />
               </FormControl>
 
               {product?.images?.length > 0 && (
                 <Box mt={3}>
-                  <Text fontSize="sm" fontWeight="600" mb={2}>Imágenes actuales:</Text>
-                  <HStack spacing={2} flexWrap="wrap">
-                    {product.images.map((img, i) => (
-                      <Image
-                        key={i}
-                        src={img.url}
-                        alt={`Imagen ${i + 1}`}
-                        boxSize="60px"
-                        objectFit="cover"
-                        borderRadius="md"
-                        border="1px solid"
-                        borderColor="gray.200"
-                      />
-                    ))}
-                  </HStack>
+                  <Text fontSize="sm" fontWeight="600" mb={2}>Imagen actual (será reemplazada):</Text>
+                  <Image
+                    src={product.images[0].url}
+                    alt="Imagen actual"
+                    boxSize="80px"
+                    objectFit="cover"
+                    borderRadius="md"
+                    border="1px solid"
+                    borderColor="gray.200"
+                  />
                 </Box>
               )}
             </Box>

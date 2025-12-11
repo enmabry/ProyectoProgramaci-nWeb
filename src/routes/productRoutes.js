@@ -256,7 +256,8 @@ async function buildPayloadFromBody(body, files){
     }
   }
 
-  const combined = [...uploaded, ...uploadedFromUrls];
+  // Combinar: si hay archivos, usarlos; si no, usar URLs; si ambos, solo archivos
+  const combined = uploaded.length > 0 ? uploaded : uploadedFromUrls;
   if (combined.length) payload.images = combined;
   return payload;
 }
@@ -277,17 +278,13 @@ router.put('/:id', authenticateJWT, authorizeRoles('admin'), upload.array('image
   try {
     const payload = await buildPayloadFromBody(req.body, req.files);
 
-    // Manejar imágenes: preservar existentes y añadir nuevas
-    if (req.body.existingImages) {
-      try {
-        const existing = JSON.parse(req.body.existingImages);
-        const added = payload.images || [];
-        payload.images = [...existing, ...added];
-      } catch (e) {
-        console.error('Error parsing existingImages:', e);
-        // Si falla el parse, usar solo las nuevas
-      }
+    // Manejar imágenes: si hay nuevas imágenes, reemplazar las antiguas
+    // Si NO hay nuevas imágenes, preservar las existentes
+    if (!payload.images || payload.images.length === 0) {
+      // No hay nuevas imágenes, no cambiar las existentes
+      delete payload.images;
     }
+    // Si hay nuevas imágenes (en payload.images), reemplazar las antiguas
 
     const product = await Product.findByIdAndUpdate(
       req.params.id,
