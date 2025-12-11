@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Container, Heading, Text, Button, HStack, VStack, Image, Grid, GridItem, IconButton, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Divider, Flex } from '@chakra-ui/react'
+import { Box, Container, Heading, Text, Button, HStack, VStack, Image, Grid, GridItem, IconButton, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Divider, Flex, useToast } from '@chakra-ui/react'
 import { Link, useNavigate } from 'react-router-dom'
 import { MdDelete, MdShoppingCart } from 'react-icons/md'
 import NavbarGlass from '../components/NavbarGlass'
@@ -75,6 +75,59 @@ function CartItem({ item }){
 export default function CartPage(){
   const { items, clearCart, total, itemCount } = useCart()
   const navigate = useNavigate()
+  const toast = useToast()
+  const [processingPayment, setProcessingPayment] = React.useState(false)
+
+  const handleCheckout = async () => {
+    try {
+      setProcessingPayment(true)
+      
+      // Preparar items para enviar al backend
+      const checkoutItems = items.map(item => ({
+        productId: item._id,
+        quantity: item.quantity
+      }))
+
+      // Llamar al endpoint de checkout
+      const response = await fetch('/api/orders/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ items: checkoutItems })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Error en el pago')
+      }
+
+      const data = await response.json()
+      
+      toast({
+        title: '¡Pago procesado!',
+        description: `Orden #${data.orderId} creada exitosamente. Stock actualizado.`,
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+        position: 'top-right'
+      })
+
+      // Limpiar carrito y redirigir
+      clearCart()
+      navigate('/')
+    } catch (err) {
+      toast({
+        title: 'Error en el pago',
+        description: err.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'top-right'
+      })
+    } finally {
+      setProcessingPayment(false)
+    }
+  }
 
   if(items.length === 0){
     return (
@@ -128,7 +181,15 @@ export default function CartPage(){
                   <Text fontSize="lg" fontWeight="700">Total</Text>
                   <Text fontSize="xl" fontWeight="700" color="brand.700">{formatCurrency(total)}</Text>
                 </Flex>
-                <Button colorScheme="brand" size="lg" w="full" mt={4}>
+                <Button 
+                  colorScheme="brand" 
+                  size="lg" 
+                  w="full" 
+                  mt={4}
+                  onClick={handleCheckout}
+                  isLoading={processingPayment}
+                  loadingText="Procesando pago..."
+                >
                   Proceder al pago
                 </Button>
                 <Button as={Link} to="/catalog" variant="outline" colorScheme="brand" size="md" w="full">

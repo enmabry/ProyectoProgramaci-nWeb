@@ -28,10 +28,12 @@ app.use(express.static(require('path').join(__dirname, 'public')));
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/chats', chatRoutes);
+app.use('/api/orders', orderRoutes);
 
 
 // --- Rutas de prueba ---

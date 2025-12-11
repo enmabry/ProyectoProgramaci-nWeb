@@ -51,11 +51,14 @@ export default function CatalogPage(){
   useEffect(()=>{
     const cat = searchParams.get('category')
     if(cat) setCategories([cat])
+    
+    const q = searchParams.get('search')
+    if(q) setSearch(q)
   },[searchParams])
 
   useEffect(()=>{
     let mounted=true
-    fetch(`/api/products?sort=${sort}`)
+    fetch(`/api/orders/available?sort=${sort}`)
       .then(r=>r.json())
       .then(d=>{if(mounted){setAll(Array.isArray(d)?d:[]);setLoading(false)}})
       .catch(()=>{if(mounted){setAll([]);setLoading(false)}})
