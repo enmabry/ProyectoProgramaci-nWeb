@@ -96,19 +96,6 @@ export default function ProductDetailPage() {
     const images = product.images?.length ? product.images : [{ url: '', public_id: '' }]
     const currentImage = images[selectedImage]?.url || ''
 
-    const careLabels = {
-        light: {
-            baja: 'Prefiere luz baja o sombra brillante (indirecta). Evita sol directo fuerte.',
-            media: 'Luz media filtrada. Cerca de una ventana brillante sin sol directo intenso.',
-            alta: 'Luz muy brillante o sol directo suave. Ideal ventanas orientadas al este.'
-        },
-        watering: {
-            poco: 'Riegos espaciados. Deja secar la capa superior antes de volver a hidratar.',
-            medio: 'Riego moderado. Mantén el sustrato ligeramente húmedo, no encharcado.',
-            frecuente: 'Necesita humedad constante. Revisa el sustrato seguido y evita que se seque.'
-        }
-    }
-
     return (
         <Box>
             <NavbarGlass />
@@ -167,62 +154,91 @@ export default function ProductDetailPage() {
 
                                 {/* Stock badge */}
                                 {product.stock > 0 ? (
-                                    <Badge colorScheme="green" fontSize="sm" w="fit-content">En stock</Badge>
+                                    <Badge 
+                                        colorScheme="green" 
+                                        fontSize="xs" 
+                                        px={3} 
+                                        py={1}
+                                        borderRadius="full"
+                                        fontWeight="600"
+                                        letterSpacing="0.5px"
+                                        w="fit-content"
+                                    >
+                                        EN STOCK • {product.stock} disponible{product.stock !== 1 ? 's' : ''}
+                                    </Badge>
                                 ) : (
-                                    <Badge colorScheme="red" fontSize="sm" w="fit-content">Agotado</Badge>
+                                    <Badge 
+                                        colorScheme="red" 
+                                        fontSize="xs"
+                                        px={3}
+                                        py={1}
+                                        borderRadius="full"
+                                        fontWeight="600"
+                                        w="fit-content"
+                                    >
+                                        AGOTADO
+                                    </Badge>
                                 )}
 
                                 {/* Cantidad y botones */}
-                                <HStack spacing={4} pt={2}>
-                                    <Box>
-                                        <Text fontSize="xs" mb={1} fontWeight="600">Cantidad:</Text>
-                                        <NumberInput
-                                            size="md"
-                                            maxW={24}
-                                            min={1}
-                                            max={product.stock || 1}
-                                            value={quantity}
-                                            onChange={(val) => setQuantity(parseInt(val) || 1)}
-                                        >
-                                            <NumberInputField />
-                                            <NumberInputStepper>
-                                                <NumberIncrementStepper />
-                                                <NumberDecrementStepper />
-                                            </NumberInputStepper>
-                                        </NumberInput>
+                                <HStack spacing={4} pt={4} align="flex-end">
+                                    <Box flexShrink={0}>
+                                        <Text fontSize="xs" mb={2} fontWeight="700" textTransform="uppercase" letterSpacing="0.5px" color="gray.700">Cantidad</Text>
+                                        <HStack>
+                                            <NumberInput
+                                                size="md"
+                                                maxW={20}
+                                                min={1}
+                                                max={product.stock || 1}
+                                                value={quantity}
+                                                onChange={(val) => setQuantity(parseInt(val) || 1)}
+                                                clampValueOnBlur={true}
+                                            >
+                                                <NumberInputField textAlign="center" />
+                                                <NumberInputStepper>
+                                                    <NumberIncrementStepper />
+                                                    <NumberDecrementStepper />
+                                                </NumberInputStepper>
+                                            </NumberInput>
+                                            <Text fontSize="xs" color="gray.500" fontWeight="500">
+                                                de {product.stock}
+                                            </Text>
+                                        </HStack>
                                     </Box>
                                     <Button
                                         flex={1}
                                         colorScheme="brand"
                                         size="lg"
+                                        fontWeight="600"
                                         isDisabled={product.stock < 1}
                                         onClick={() => {
                                             addToCart(product, quantity)
-                                            toast({
-                                                title: 'Producto añadido',
-                                                description: `${quantity} x ${product.name}`,
-                                                status: 'success',
-                                                duration: 3000,
-                                                isClosable: true,
-                                                position: 'top-right'
-                                            })
+                                            navigate('/cart')
                                         }}
                                     >
-                                        Añadir al carrito
+                                        Comprar ahora
                                     </Button>
                                 </HStack>
                                 <Button
+                                    w="full"
                                     variant="outline"
                                     colorScheme="brand"
-                                    size="lg"
-                                    w="full"
+                                    size="md"
+                                    fontWeight="500"
                                     isDisabled={product.stock < 1}
                                     onClick={() => {
                                         addToCart(product, quantity)
-                                        navigate('/cart')
+                                        toast({
+                                            title: 'Producto añadido',
+                                            description: `${quantity} x ${product.name}`,
+                                            status: 'success',
+                                            duration: 3000,
+                                            isClosable: true,
+                                            position: 'top-right'
+                                        })
                                     }}
                                 >
-                                    Comprar ahora
+                                    Añadir al carrito
                                 </Button>
                             </VStack>
                         </GridItem>
@@ -235,17 +251,17 @@ export default function ProductDetailPage() {
                             <CareCard
                                 icon="light"
                                 title="Luz"
-                                description={careLabels.light[product.care?.light] || 'Luz media filtrada'}
+                                description={product.care?.light?.description || 'Luz media filtrada'}
                             />
                             <CareCard
                                 icon="water"
                                 title="Riego"
-                                description={careLabels.watering[product.care?.watering] || 'Riego moderado'}
+                                description={product.care?.watering?.description || 'Riego moderado'}
                             />
                             <CareCard
                                 icon="temp"
                                 title="Temperatura"
-                                description={product.care?.temp || '18–24°C estable, evita cambios bruscos y corrientes frías.'}
+                                description={product.care?.temp?.description || '18–24°C'}
                             />
                         </Flex>
                     </Box>

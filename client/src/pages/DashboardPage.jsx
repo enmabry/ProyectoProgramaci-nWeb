@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Box, Container, Flex, HStack, VStack, Text, Heading, Button, Image, SimpleGrid, Input, InputGroup, InputLeftElement, Skeleton } from '@chakra-ui/react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import HeroImage from '../assets/images/fondoDashboard.jpg'
 import '../styles/dashboard.css'
@@ -15,16 +15,31 @@ function formatCurrency(value){
 }
 
 function Hero(){
+  const navigate = useNavigate()
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate(`/catalog?search=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
+
   return (
     <Box as="section" className="hero-section" style={{ ['--hero-bg']:`url(${HeroImage})` }}>
       <Container maxW="7xl">
            <VStack spacing={7} align="center" textAlign="center">
              <Heading as="h1" className="hero-title">Orden, luz y savia</Heading>
              <Text as="p" className="hero-quote">
-               “Creemos que el gusto por lo vivo se cultiva. Por eso diseñamos principios claros —luz, riego, sustrato y forma— para que tu hogar reconozca la belleza del verde casi… <span className="hero-quote-em">a priori</span>.”
+               "Creemos que el gusto por lo vivo se cultiva. Por eso diseñamos principios claros —luz, riego, sustrato y forma— para que tu hogar reconozca la belleza del verde casi… <span className="hero-quote-em">a priori</span>."
              </Text>
           <InputGroup maxW="lg" className="hero-search-group">
-            <Input placeholder="¿Qué planta buscas?" className="hero-search" />
+            <Input 
+              placeholder="¿Qué planta buscas?" 
+              className="hero-search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
+            />
           </InputGroup>
           <Button size="lg" variant="solid" as={Link} to="/catalog">Ver catálogo</Button>
         </VStack>

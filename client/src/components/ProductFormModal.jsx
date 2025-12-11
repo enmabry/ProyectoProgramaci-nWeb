@@ -9,13 +9,16 @@ import { MdClose, MdAdd } from 'react-icons/md'
 const CATEGORIES_OPTIONS = ['Interior', 'Exterior', 'Suculentas', 'Tropical', 'Cactus', 'Árbol', 'Medicinal', 'Palmeras']
 const LIGHT_OPTIONS = ['baja', 'media', 'alta']
 const WATERING_OPTIONS = ['poco', 'medio', 'frecuente']
+const TEMP_OPTIONS = ['fresco', 'moderado', 'calido']
 const SIZE_OPTIONS = ['S', 'M', 'L']
 
 export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
   const toast = useToast()
   const [loading, setLoading] = useState(false)
   const [imageFiles, setImageFiles] = useState([])
-  const [imageUrls, setImageUrls] = useState('')
+  const [imageUrls, setImageUrls] = useState([])
+  const [allImages, setAllImages] = useState([])
+  const [hoveredImage, setHoveredImage] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -28,7 +31,7 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
     care: {
       light: 'media',
       watering: 'medio',
-      temp: ''
+      temp: 'moderado'
     },
     size: 'M',
     dimensions: '',
@@ -60,6 +63,12 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
         stock: product.stock || '',
         isFeatured: product.isFeatured || false
       })
+      // Inicializar imágenes existentes (solo la primera)
+      if (product?.images?.length > 0) {
+        setAllImages([product.images[0]])
+      } else {
+        setAllImages([])
+      }
     } else {
       // Reset para crear nuevo
       setFormData({
@@ -78,9 +87,12 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
         stock: '',
         isFeatured: false
       })
-      setImageFiles([])
-      setImageUrls('')
+      setAllImages([])
     }
+    
+    // IMPORTANTE: Limpiar estados de imágenes nuevas cuando se abre/cierra el modal
+    setImageFiles([])
+    setImageUrls([])
   }, [product, isOpen])
 
   const handleChange = (field, value) => {
@@ -96,7 +108,32 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
 
   const handleImageFilesChange = (e) => {
     const files = Array.from(e.target.files)
-    setImageFiles(files)
+    const total = imageFiles.length + imageUrls.length + allImages.length
+    if (total >= 1) {
+      toast({ title: 'Solo se permite 1 imagen. Elimina la actual para subir otra.', status: 'warning', duration: 2000, isClosable: true })
+      return
+    }
+    setImageFiles(prev => [...prev, ...files.slice(0, 1)])
+  }
+
+  const handleAddImageUrl = (url) => {
+    if (!url.trim()) return
+    const total = imageFiles.length + imageUrls.length + allImages.length
+    if (total >= 1) {
+      toast({ title: 'Solo se permite 1 imagen. Elimina la actual para agregar otra.', status: 'warning', duration: 2000, isClosable: true })
+      return
+    }
+    setImageUrls(prev => [...prev, url])
+  }
+
+  const handleRemoveImage = (index, type) => {
+    if (type === 'file') {
+      setImageFiles(prev => prev.filter((_, i) => i !== index))
+    } else if (type === 'url') {
+      setImageUrls(prev => prev.filter((_, i) => i !== index))
+    } else if (type === 'existing') {
+      setAllImages(prev => prev.filter((_, i) => i !== index))
+    }
   }
 
   const handleSubmit = async () => {
@@ -136,19 +173,19 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
       formDataToSend.append('stock', formData.stock || 0)
       formDataToSend.append('isFeatured', formData.isFeatured)
 
-      // Si es edición, preservar imágenes existentes
-      if (product && product.images && product.images.length > 0) {
-        formDataToSend.append('existingImages', JSON.stringify(product.images))
-      }
-
-      // Imágenes de archivos nuevos
+      // Enviar imágenes nuevas desde archivos
       imageFiles.forEach(file => {
         formDataToSend.append('images', file)
       })
 
-      // URLs de imágenes nuevas
-      if (imageUrls.trim()) {
-        formDataToSend.append('imageUrls', imageUrls.trim())
+      // Enviar URLs de imágenes nuevas
+      if (imageUrls.length > 0) {
+        formDataToSend.append('imageUrls', JSON.stringify(imageUrls))
+      }
+
+      // Enviar IDs de imágenes existentes a preservar
+      if (allImages.length > 0) {
+        formDataToSend.append('existingImages', JSON.stringify(allImages.map(img => img.publicId)))
       }
 
       const url = product ? `/api/products/${product._id}` : '/api/products'
@@ -319,12 +356,15 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
 
                 <FormControl>
                   <FormLabel fontSize="sm">Temperatura</FormLabel>
-                  <Input
+                  <Select
                     value={formData.care.temp}
                     onChange={(e) => handleCareChange('temp', e.target.value)}
-                    placeholder="18–26°C"
                     size="sm"
-                  />
+                  >
+                    {TEMP_OPTIONS.map(opt => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </Select>
                 </FormControl>
               </Grid>
             </Box>
@@ -391,52 +431,131 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
 
             {/* Imágenes */}
             <Box p={4} bg="gray.50" borderRadius="md">
-              <Text fontWeight="600" mb={3} fontSize="sm">Imágenes del producto</Text>
+              <Text fontWeight="600" mb={3} fontSize="sm">Imagen del producto (máximo 1)</Text>
+              <Text fontSize="xs" color="gray.600" mb={3}>Total: {imageFiles.length + imageUrls.length + allImages.length}/1</Text>
               
               <FormControl mb={3}>
-                <FormLabel fontSize="sm">Subir archivos (máx 8)</FormLabel>
+                <FormLabel fontSize="sm">Subir imagen (JPG, PNG, etc.)</FormLabel>
                 <Input
                   type="file"
-                  multiple
                   accept="image/*"
                   onChange={handleImageFilesChange}
                   size="sm"
-                />
-                {imageFiles.length > 0 && (
-                  <Text fontSize="xs" color="gray.600" mt={1}>
-                    {imageFiles.length} archivo(s) seleccionado(s)
-                  </Text>
-                )}
-              </FormControl>
-
-              <FormControl>
-                <FormLabel fontSize="sm">O pegar URLs de imágenes (una por línea)</FormLabel>
-                <Textarea
-                  value={imageUrls}
-                  onChange={(e) => setImageUrls(e.target.value)}
-                  placeholder="https://example.com/image1.jpg"
-                  rows={3}
-                  size="sm"
+                  isDisabled={imageFiles.length + imageUrls.length + allImages.length >= 1}
                 />
               </FormControl>
 
-              {product?.images?.length > 0 && (
-                <Box mt={3}>
-                  <Text fontSize="sm" fontWeight="600" mb={2}>Imágenes actuales:</Text>
-                  <HStack spacing={2} flexWrap="wrap">
-                    {product.images.map((img, i) => (
-                      <Image
-                        key={i}
-                        src={img.url}
-                        alt={`Imagen ${i + 1}`}
-                        boxSize="60px"
-                        objectFit="cover"
-                        borderRadius="md"
-                        border="1px solid"
-                        borderColor="gray.200"
-                      />
+              {imageFiles.length > 0 && (
+                <Box mb={3}>
+                  <Text fontSize="xs" fontWeight="600" mb={2}>Imágenes nuevas ({imageFiles.length}):</Text>
+                  <VStack spacing={2} align="flex-start">
+                    {imageFiles.map((file, idx) => (
+                      <VStack key={`file-${idx}`} spacing={1} align="flex-start">
+                        <Image
+                          src={URL.createObjectURL(file)}
+                          alt={`Nueva imagen ${idx + 1}`}
+                          boxSize="80px"
+                          objectFit="cover"
+                          borderRadius="md"
+                          border="2px solid"
+                          borderColor="blue.300"
+                        />
+                        <Button
+                          leftIcon={<MdClose />}
+                          colorScheme="red"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRemoveImage(idx, 'file')}
+                        >
+                          Eliminar
+                        </Button>
+                      </VStack>
                     ))}
-                  </HStack>
+                  </VStack>
+                </Box>
+              )}
+
+              <FormControl mb={3}>
+                <FormLabel fontSize="sm">Agregar imagen por URL</FormLabel>
+                <HStack spacing={2}>
+                  <Input
+                    id="imageUrlInput"
+                    placeholder="https://example.com/image.jpg"
+                    size="sm"
+                  />
+                  <Button
+                    colorScheme="blue"
+                    size="sm"
+                    onClick={() => {
+                      const input = document.getElementById('imageUrlInput')
+                      handleAddImageUrl(input.value)
+                      input.value = ''
+                    }}
+                    isDisabled={imageFiles.length + imageUrls.length + allImages.length >= 1}
+                  >
+                    <MdAdd />
+                  </Button>
+                </HStack>
+              </FormControl>
+
+              {imageUrls.length > 0 && (
+                <Box mb={3}>
+                  <Text fontSize="xs" fontWeight="600" mb={2}>URLs agregadas ({imageUrls.length}):</Text>
+                  <VStack spacing={2} align="flex-start">
+                    {imageUrls.map((url, idx) => (
+                      <VStack key={`url-${idx}`} spacing={1} align="flex-start">
+                        <Image
+                          src={url}
+                          alt={`Imagen URL ${idx + 1}`}
+                          boxSize="80px"
+                          objectFit="cover"
+                          borderRadius="md"
+                          border="2px solid"
+                          borderColor="purple.300"
+                          onError={() => {}}
+                        />
+                        <Button
+                          leftIcon={<MdClose />}
+                          colorScheme="red"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRemoveImage(idx, 'url')}
+                        >
+                          Eliminar
+                        </Button>
+                      </VStack>
+                    ))}
+                  </VStack>
+                </Box>
+              )}
+
+              {allImages.length > 0 && (
+                <Box mt={3}>
+                  <Text fontSize="xs" fontWeight="600" mb={2}>Imágenes existentes ({allImages.length}):</Text>
+                  <VStack spacing={2} align="flex-start">
+                    {allImages.map((img, idx) => (
+                      <VStack key={`existing-${idx}`} spacing={1} align="flex-start">
+                        <Image
+                          src={img.url}
+                          alt={`Imagen existente ${idx + 1}`}
+                          boxSize="80px"
+                          objectFit="cover"
+                          borderRadius="md"
+                          border="2px solid"
+                          borderColor="green.300"
+                        />
+                        <Button
+                          leftIcon={<MdClose />}
+                          colorScheme="red"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRemoveImage(idx, 'existing')}
+                        >
+                          Eliminar
+                        </Button>
+                      </VStack>
+                    ))}
+                  </VStack>
                 </Box>
               )}
             </Box>

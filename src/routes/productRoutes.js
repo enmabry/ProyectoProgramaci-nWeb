@@ -2,9 +2,27 @@ const { Router } = require('express');
 const Product = require('../models/Product');
 const { authenticateJWT, authorizeRoles } = require('../middleware/authenticateJWT');
 const { upload, cloudinary } = require('../config/cloudinary');
+const careOptions = require('../config/careOptions');
 
 const router = Router();
 
+/**
+ * @swagger
+ * /api/products/slug/{slug}:
+ *   get:
+ *     summary: Obtener producto por slug
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Producto encontrado
+ *       404:
+ *         description: Producto no encontrado
+ */
 // GET por slug (detalle de producto)
 router.get('/slug/:slug', async (req, res) => {
   try {
@@ -16,6 +34,29 @@ router.get('/slug/:slug', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/products:
+ *   get:
+ *     summary: Listar todos los productos
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema: { type: string }
+ *       - in: query
+ *         name: minPrice
+ *         schema: { type: number }
+ *       - in: query
+ *         name: maxPrice
+ *         schema: { type: number }
+ *       - in: query
+ *         name: sort
+ *         schema: { type: string, enum: ['price-asc', 'price-desc', 'newest'] }
+ *     responses:
+ *       200:
+ *         description: Lista de productos
+ */
 // GET todos los productos (con filtros opcionales)
 router.get('/', async (req, res) => {
   try {
@@ -42,6 +83,23 @@ router.get('/', async (req, res) => {
 });
 
 // GET producto por ID
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   get:
+ *     summary: Obtener producto por ID
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Producto encontrado
+ *       404:
+ *         description: Producto no encontrado
+ */
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -51,6 +109,87 @@ router.get('/:id', async (req, res) => {
     res.status(400).json({ error: e.message });
   }
 });
+
+/**
+ * @swagger
+ * /api/products:
+ *   post:
+ *     summary: Crear nuevo producto (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string, description: 'Nombre del producto' }
+ *               slug: { type: string, description: 'URL slug único' }
+ *               price: { type: number, description: 'Precio en pesos' }
+ *               stock: { type: number, description: 'Cantidad disponible' }
+ *               care: { type: string, description: 'JSON con luz, riego, temperatura' }
+ *               images: { type: array, items: { type: string, format: binary } }
+ *     responses:
+ *       201:
+ *         description: Producto creado exitosamente
+ *       400:
+ *         description: Error en validación
+ *       401:
+ *         description: No autorizado
+ */
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   put:
+ *     summary: Actualizar producto (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string }
+ *               price: { type: number }
+ *               stock: { type: number }
+ *               care: { type: string }
+ *               images: { type: array, items: { type: string, format: binary } }
+ *     responses:
+ *       200:
+ *         description: Producto actualizado
+ *       404:
+ *         description: Producto no encontrado
+ *       401:
+ *         description: No autorizado
+ *
+ *   delete:
+ *     summary: Eliminar producto (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Producto eliminado exitosamente
+ *       404:
+ *         description: Producto no encontrado
+ *       401:
+ *         description: No autorizado
+ */
 
 // Helper para castear y parsear campos desde multipart/form-data o JSON
 async function buildPayloadFromBody(body, files){
@@ -77,11 +216,24 @@ async function buildPayloadFromBody(body, files){
   if (maybeBadges) payload.badges = maybeBadges;
 
   // Objeto care (light, watering, temp)
-  if (payload.care && typeof payload.care === 'string') {
-    try {
-      payload.care = JSON.parse(payload.care);
-    } catch {
-      // Si falla el parse, dejarlo como está
+  if (payload.care) {
+    if (typeof payload.care === 'string') {
+      try {
+        payload.care = JSON.parse(payload.care);
+      } catch {
+        // Si falla el parse, dejarlo como está
+      }
+    }
+    
+    // Mapear valores simples a objetos completos con careOptions
+    if (payload.care.light && typeof payload.care.light === 'string') {
+      payload.care.light = careOptions.light[payload.care.light] || careOptions.light.media;
+    }
+    if (payload.care.watering && typeof payload.care.watering === 'string') {
+      payload.care.watering = careOptions.watering[payload.care.watering] || careOptions.watering.medio;
+    }
+    if (payload.care.temp && typeof payload.care.temp === 'string') {
+      payload.care.temp = careOptions.temp[payload.care.temp] || careOptions.temp.moderado;
     }
   }
 
@@ -89,7 +241,7 @@ async function buildPayloadFromBody(body, files){
   const uploaded = Array.isArray(files)
     ? files
         .filter(f => f.path && f.filename)
-        .map(f => ({ url: f.path, public_id: f.filename }))
+        .map(f => ({ url: f.path, publicId: f.filename }))
     : [];
 
   // Imágenes a partir de URLs (imageUrls puede ser JSON ["http..",...] o CSV)
@@ -99,18 +251,54 @@ async function buildPayloadFromBody(body, files){
     for (const url of maybeUrls){
       try {
         const r = await cloudinary.uploader.upload(url, { folder: 'products' });
-        uploadedFromUrls.push({ url: r.secure_url, public_id: r.public_id });
+        uploadedFromUrls.push({ url: r.secure_url, publicId: r.public_id });
       } catch { /* ignoramos URLs que fallen */ }
     }
   }
 
-  const combined = [...uploaded, ...uploadedFromUrls];
-  if (combined.length) payload.images = combined;
+  // Combinar imágenes nuevas (archivos + URLs)
+  const allNew = [...uploaded, ...uploadedFromUrls];
+  
+  // Imágenes existentes a preservar
+  const existingImages = toArray(body.existingImages);
+  
+  // Si hay imágenes nuevas, usar solo esas; si no, preservar las existentes
+  let finalImages = [];
+  let imagesToDelete = [];
+  
+  if (allNew.length > 0) {
+    finalImages = allNew;
+  } else if (existingImages && existingImages.length > 0) {
+    // Si no hay nuevas pero hay existentes para preservar, usarlas
+    const product = await Product.findById(req.params?.id);
+    if (product && product.images) {
+      // Detectar imágenes a eliminar (las que no están en existingImages)
+      imagesToDelete = product.images
+        .filter(img => !existingImages.includes(img.publicId))
+        .map(img => img.publicId);
+      
+      // Eliminar las imágenes de Cloudinary
+      for (const publicId of imagesToDelete) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (err) {
+          console.error(`Error eliminando imagen ${publicId}:`, err.message);
+        }
+      }
+      
+      finalImages = product.images.filter(img => existingImages.includes(img.publicId));
+    }
+  }
+  
+  // Limitar a máximo 1 imagen
+  if (finalImages.length > 0) {
+    payload.images = finalImages.slice(0, 1);
+  }
   return payload;
 }
 
 // POST crear producto (solo admin) con subida de imágenes
-router.post('/', authenticateJWT, authorizeRoles('admin'), upload.array('images', 8), async (req, res) => {
+router.post('/', authenticateJWT, authorizeRoles('admin'), upload.array('images', 1), async (req, res) => {
   try {
     const payload = await buildPayloadFromBody(req.body, req.files);
     const product = await Product.create(payload);
@@ -121,20 +309,13 @@ router.post('/', authenticateJWT, authorizeRoles('admin'), upload.array('images'
 });
 
 // PUT actualizar producto (solo admin) con posibilidad de subir nuevas imágenes
-router.put('/:id', authenticateJWT, authorizeRoles('admin'), upload.array('images', 8), async (req, res) => {
+router.put('/:id', authenticateJWT, authorizeRoles('admin'), upload.array('images', 1), async (req, res) => {
   try {
     const payload = await buildPayloadFromBody(req.body, req.files);
 
-    // Manejar imágenes: preservar existentes y añadir nuevas
-    if (req.body.existingImages) {
-      try {
-        const existing = JSON.parse(req.body.existingImages);
-        const added = payload.images || [];
-        payload.images = [...existing, ...added];
-      } catch (e) {
-        console.error('Error parsing existingImages:', e);
-        // Si falla el parse, usar solo las nuevas
-      }
+    // Si payload.images está vacío, no incluirlo para que no sobrescriba
+    if (!payload.images || payload.images.length === 0) {
+      delete payload.images;
     }
 
     const product = await Product.findByIdAndUpdate(
@@ -150,6 +331,30 @@ router.put('/:id', authenticateJWT, authorizeRoles('admin'), upload.array('image
 });
 
 // Ruta utilitaria: subir solo una imagen y devolver URL (solo admin)
+/**
+ * @swagger
+ * /api/products/upload:
+ *   post:
+ *     summary: Subir imagen a Cloudinary (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image: { type: string, format: binary }
+ *     responses:
+ *       200:
+ *         description: Imagen subida exitosamente
+ *       400:
+ *         description: No se recibió imagen
+ *       401:
+ *         description: No autorizado
+ */
 router.post('/upload', authenticateJWT, authorizeRoles('admin'), upload.single('image'), async (req, res) => {
   try {
     if (!req.file?.path) return res.status(400).json({ error: 'No se recibió imagen' });
@@ -160,6 +365,30 @@ router.post('/upload', authenticateJWT, authorizeRoles('admin'), upload.single('
 });
 
 // Subir imagen desde URL y devolver {url, public_id}
+/**
+ * @swagger
+ * /api/products/upload/url:
+ *   post:
+ *     summary: Subir imagen desde URL a Cloudinary (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               url: { type: string, description: 'URL de la imagen a subir' }
+ *     responses:
+ *       200:
+ *         description: Imagen subida exitosamente desde URL
+ *       400:
+ *         description: URL no proporcionada o error en subida
+ *       401:
+ *         description: No autorizado
+ */
 router.post('/upload/url', authenticateJWT, authorizeRoles('admin'), async (req, res) => {
   try {
     const url = req.body.url || req.body.imageUrl;
@@ -194,6 +423,37 @@ router.delete('/:id', authenticateJWT, authorizeRoles('admin'), async (req, res)
 
 // DELETE imágenes específicas del producto (solo admin)
 // Body JSON: { publicIds: ["products/abc123", "products/xyz456"] }
+/**
+ * @swagger
+ * /api/products/{id}/images/delete:
+ *   post:
+ *     summary: Eliminar imágenes específicas de un producto (admin)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               publicIds: { type: array, items: { type: string }, description: 'IDs de Cloudinary a eliminar' }
+ *     responses:
+ *       200:
+ *         description: Imágenes eliminadas exitosamente
+ *       400:
+ *         description: publicIds requerido o vacío
+ *       404:
+ *         description: Producto no encontrado
+ *       401:
+ *         description: No autorizado
+ */
 router.post('/:id/images/delete', authenticateJWT, authorizeRoles('admin'), async (req, res) => {
   try {
     const { publicIds } = req.body;

@@ -10,15 +10,25 @@ const ProductSchema = new mongoose.Schema({
   price:      { type: Number, required: true, min: 0 }, // Precio del producto, requerido y no negativo
   compareAtPrice: { type: Number }, // Precio de comparación opcional para mostrar descuentos
   images:     { 
-    type: [{ url: String, public_id: String }], 
+    type: [{ url: String, publicId: String }], 
     default: [] 
   }, // Array de imágenes del producto (Cloudinary)
   categories: { type: [String], default: [] }, // Categorías del producto, ej: ["Interior","Suculentas"]
   badges:     { type: [String], default: [] }, // Insignias del producto, ej: ["nuevo","top"]
   care: {
-    light:    { type: String, enum: ['baja','media','alta'], default: 'media' }, // Requerimientos de luz
-    watering: { type: String, enum: ['poco','medio','frecuente'], default: 'medio' }, // Frecuencia de riego
-    temp:     { type: String, default: '' } // Temperatura recomendada, ej: "18–24°C"
+    light: {
+      value:       { type: String, enum: ['baja','media','alta'], default: 'media' },
+      description: { type: String, default: 'Luz media filtrada' }
+    },
+    watering: {
+      value:       { type: String, enum: ['poco','medio','frecuente'], default: 'medio' },
+      description: { type: String, default: 'Riego moderado' }
+    },
+    temp: {
+      value:       { type: String, enum: ['fresco','moderado','calido'], default: 'moderado' },
+      range:       { type: String, default: '18–24°C' },
+      description: { type: String, default: 'Temperatura moderada. Rango óptimo para la mayoría de plantas de interior.' }
+    }
   },
   size:       { type: String, enum: ['S','M','L'], default: 'M' }, // Tamaño del producto
   dimensions: { type: String, default: '' }, // Dimensiones del producto, ej: "20–30 cm"
