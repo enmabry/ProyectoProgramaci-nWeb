@@ -225,48 +225,48 @@ async function buildTransport(){
  *       404:
  *         description: Usuario no encontrado
  */
-router.post('/forgot', async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ error: 'Email requerido', code: 'EMAIL_REQUIRED' });
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: 'No existe usuario con ese email', code: 'EMAIL_NOT_FOUND' });
-    const plainToken = user.createPasswordResetToken();
-    await user.save();
-    const resetLink = `${CLIENT_URL || 'http://localhost:5173'}/reset?token=${plainToken}`;
+// router.post('/forgot', async (req, res) => {
+//   try {
+//     const { email } = req.body;
+//     if (!email) return res.status(400).json({ error: 'Email requerido', code: 'EMAIL_REQUIRED' });
+//     const user = await User.findOne({ email });
+//     if (!user) return res.status(404).json({ error: 'No existe usuario con ese email', code: 'EMAIL_NOT_FOUND' });
+//     const plainToken = user.createPasswordResetToken();
+//     await user.save();
+//     const resetLink = `${CLIENT_URL || 'http://localhost:5173'}/reset?token=${plainToken}`;
 
-    // Si estamos en dev mode, devolvemos directamente el token y enlace
-    if (EMAIL_DEV_MODE === 'true') {
-      return res.json({ message: 'Token generado (dev mode)', resetToken: plainToken, link: resetLink, expiresInMinutes: 60 });
-    }
+//     // Si estamos en dev mode, devolvemos directamente el token y enlace
+//     if (EMAIL_DEV_MODE === 'true') {
+//       return res.json({ message: 'Token generado (dev mode)', resetToken: plainToken, link: resetLink, expiresInMinutes: 60 });
+//     }
 
-    const mail = {
-      from: EMAIL_FROM || 'no-reply@example.com',
-      to: user.email,
-      subject: 'Recupera tu contraseña',
-      html: `
-        <p>Has solicitado restablecer tu contraseña.</p>
-        <p>Haz clic en el siguiente enlace (válido 60 minutos):</p>
-        <p><a href="${resetLink}">${resetLink}</a></p>
-        <p>Si no solicitaste esto, ignora este correo.</p>
-      `
-    };
-    try {
-      const info = await transporter.sendMail(mail);
-      let previewUrl;
-      if (nodemailer.getTestMessageUrl && ETHEREAL_MODE === 'true') {
-        previewUrl = nodemailer.getTestMessageUrl(info);
-      }
-      res.json({ message: 'Email enviado', expiresInMinutes: 60, preview: previewUrl });
-    } catch (mailErr) {
-      console.error('Error enviando email reset:', mailErr.message);
-      // Fallback: devolver token para poder continuar pruebas
-      res.status(200).json({ message: 'Email no enviado, usando fallback', resetToken: plainToken, link: resetLink, code: 'EMAIL_FALLBACK' });
-    }
-  } catch (e) {
-    res.status(400).json({ error: e.message, code: 'FORGOT_ERROR' });
-  }
-});
+//     const mail = {
+//       from: EMAIL_FROM || 'no-reply@example.com',
+//       to: user.email,
+//       subject: 'Recupera tu contraseña',
+//       html: `
+//         <p>Has solicitado restablecer tu contraseña.</p>
+//         <p>Haz clic en el siguiente enlace (válido 60 minutos):</p>
+//         <p><a href="${resetLink}">${resetLink}</a></p>
+//         <p>Si no solicitaste esto, ignora este correo.</p>
+//       `
+//     };
+//     try {
+//       const info = await transporter.sendMail(mail);
+//       let previewUrl;
+//       if (nodemailer.getTestMessageUrl && ETHEREAL_MODE === 'true') {
+//         previewUrl = nodemailer.getTestMessageUrl(info);
+//       }
+//       res.json({ message: 'Email enviado', expiresInMinutes: 60, preview: previewUrl });
+//     } catch (mailErr) {
+//       console.error('Error enviando email reset:', mailErr.message);
+//       // Fallback: devolver token para poder continuar pruebas
+//       res.status(200).json({ message: 'Email no enviado, usando fallback', resetToken: plainToken, link: resetLink, code: 'EMAIL_FALLBACK' });
+//     }
+//   } catch (e) {
+//     res.status(400).json({ error: e.message, code: 'FORGOT_ERROR' });
+//   }
+// });
 
 // Confirmar reset: requiere token y nueva contraseña
 /**
@@ -290,24 +290,24 @@ router.post('/forgot', async (req, res) => {
  *       400:
  *         description: Token inválido o expirado
  */
-router.post('/reset', async (req, res) => {
-  try {
-    const { token, password } = req.body;
-    if (!token || !password) return res.status(400).json({ error: 'Token y password requeridos', code: 'RESET_DATA_REQUIRED' });
-    // Hash del token recibido para comparar
-    const hash = require('crypto').createHash('sha256').update(token).digest('hex');
-    const user = await User.findOne({
-      passwordResetToken: hash,
-      passwordResetExpires: { $gt: new Date() }
-    });
-    if (!user) return res.status(400).json({ error: 'Token inválido o expirado', code: 'RESET_TOKEN_INVALID' });
-    user.password = password; // se aplicará hash en pre save si cambia
-    user.clearPasswordResetToken();
-    await user.save();
-    res.json({ message: 'Contraseña actualizada', code: 'PASSWORD_RESET_OK' });
-  } catch (e) {
-    res.status(400).json({ error: e.message, code: 'RESET_ERROR' });
-  }
-});
+// router.post('/reset', async (req, res) => {
+//   try {
+//     const { token, password } = req.body;
+//     if (!token || !password) return res.status(400).json({ error: 'Token y password requeridos', code: 'RESET_DATA_REQUIRED' });
+//     // Hash del token recibido para comparar
+//     const hash = require('crypto').createHash('sha256').update(token).digest('hex');
+//     const user = await User.findOne({
+//       passwordResetToken: hash,
+//       passwordResetExpires: { $gt: new Date() }
+//     });
+//     if (!user) return res.status(400).json({ error: 'Token inválido o expirado', code: 'RESET_TOKEN_INVALID' });
+//     user.password = password; // se aplicará hash en pre save si cambia
+//     user.clearPasswordResetToken();
+//     await user.save();
+//     res.json({ message: 'Contraseña actualizada', code: 'PASSWORD_RESET_OK' });
+//   } catch (e) {
+//     res.status(400).json({ error: e.message, code: 'RESET_ERROR' });
+//   }
+// });
 
 module.exports = router;

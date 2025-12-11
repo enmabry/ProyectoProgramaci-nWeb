@@ -2,6 +2,10 @@
 
 Aplicación web de e-commerce de plantas con panel de administración, carrito, filtros, detalle de producto y chat en tiempo real (usuario ↔ admin).
 
+## Arquitectura
+
+![Diagrama de Arquitectura](./docs/Arquitectura.png)
+
 ## Características
 
 - Catálogo con filtros por categoría y precio, paginación y destacados
