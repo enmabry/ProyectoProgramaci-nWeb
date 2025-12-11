@@ -57,6 +57,47 @@ const options = {
             role: { type: 'string', enum: ['user', 'admin'] },
           },
         },
+        Message: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            sender: {
+              type: 'object',
+              properties: {
+                _id: { type: 'string' },
+                username: { type: 'string' },
+                role: { type: 'string' },
+              },
+            },
+            senderRole: { type: 'string', enum: ['user', 'admin'] },
+            content: { type: 'string' },
+            read: { type: 'boolean' },
+            createdAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        Chat: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            user: {
+              type: 'object',
+              properties: {
+                _id: { type: 'string' },
+                username: { type: 'string' },
+                email: { type: 'string' },
+              },
+            },
+            messages: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/Message' },
+            },
+            status: { type: 'string', enum: ['active', 'closed'] },
+            unreadCount: { type: 'integer' },
+            lastMessage: { type: 'string', format: 'date-time' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
       },
     },
   },
