@@ -63,6 +63,12 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
         stock: product.stock || '',
         isFeatured: product.isFeatured || false
       })
+      // Inicializar imágenes existentes
+      if (product?.images?.length > 0) {
+        setAllImages(product.images)
+      } else {
+        setAllImages([])
+      }
     } else {
       // Reset para crear nuevo
       setFormData({
@@ -81,17 +87,12 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
         stock: '',
         isFeatured: false
       })
-      setImageFiles([])
-      setImageUrls([])
       setAllImages([])
     }
     
-    // Inicializar imágenes existentes
-    if (product?.images?.length > 0) {
-      setAllImages(product.images)
-    } else {
-      setAllImages([])
-    }
+    // IMPORTANTE: Limpiar estados de imágenes nuevas cuando se abre/cierra el modal
+    setImageFiles([])
+    setImageUrls([])
   }, [product, isOpen])
 
   const handleChange = (field, value) => {
