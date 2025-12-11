@@ -69,4 +69,17 @@ router.patch('/:id/close', authenticateJWT, authorizeRoles('admin'), async (req,
   }
 });
 
+// DELETE /api/chats/:id - Admin: eliminar chat
+router.delete('/:id', authenticateJWT, authorizeRoles('admin'), async (req, res) => {
+  try {
+    const chat = await Chat.findByIdAndDelete(req.params.id);
+    
+    if (!chat) return res.status(404).json({ error: 'Chat no encontrado' });
+    
+    res.json({ message: 'Chat eliminado correctamente' });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 module.exports = router;

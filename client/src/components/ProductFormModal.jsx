@@ -63,9 +63,9 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
         stock: product.stock || '',
         isFeatured: product.isFeatured || false
       })
-      // Inicializar imágenes existentes
+      // Inicializar imágenes existentes (solo la primera)
       if (product?.images?.length > 0) {
-        setAllImages(product.images)
+        setAllImages([product.images[0]])
       } else {
         setAllImages([])
       }
@@ -109,15 +109,18 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
   const handleImageFilesChange = (e) => {
     const files = Array.from(e.target.files)
     const total = imageFiles.length + imageUrls.length + allImages.length
-    const remaining = Math.max(0, 3 - total)
-    setImageFiles(prev => [...prev, ...files.slice(0, remaining)])
+    if (total >= 1) {
+      toast({ title: 'Solo se permite 1 imagen. Elimina la actual para subir otra.', status: 'warning', duration: 2000, isClosable: true })
+      return
+    }
+    setImageFiles(prev => [...prev, ...files.slice(0, 1)])
   }
 
   const handleAddImageUrl = (url) => {
     if (!url.trim()) return
     const total = imageFiles.length + imageUrls.length + allImages.length
-    if (total >= 3) {
-      toast({ title: 'Máximo 3 imágenes permitidas', status: 'warning', duration: 2000, isClosable: true })
+    if (total >= 1) {
+      toast({ title: 'Solo se permite 1 imagen. Elimina la actual para agregar otra.', status: 'warning', duration: 2000, isClosable: true })
       return
     }
     setImageUrls(prev => [...prev, url])
@@ -428,18 +431,17 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
 
             {/* Imágenes */}
             <Box p={4} bg="gray.50" borderRadius="md">
-              <Text fontWeight="600" mb={3} fontSize="sm">Imágenes del producto (máximo 3)</Text>
-              <Text fontSize="xs" color="gray.600" mb={3}>Total: {imageFiles.length + imageUrls.length + allImages.length}/3</Text>
+              <Text fontWeight="600" mb={3} fontSize="sm">Imagen del producto (máximo 1)</Text>
+              <Text fontSize="xs" color="gray.600" mb={3}>Total: {imageFiles.length + imageUrls.length + allImages.length}/1</Text>
               
               <FormControl mb={3}>
-                <FormLabel fontSize="sm">Subir imágenes (JPG, PNG, etc.)</FormLabel>
+                <FormLabel fontSize="sm">Subir imagen (JPG, PNG, etc.)</FormLabel>
                 <Input
                   type="file"
                   accept="image/*"
-                  multiple
                   onChange={handleImageFilesChange}
                   size="sm"
-                  isDisabled={imageFiles.length + imageUrls.length + allImages.length >= 3}
+                  isDisabled={imageFiles.length + imageUrls.length + allImages.length >= 1}
                 />
               </FormControl>
 
@@ -489,7 +491,7 @@ export default function ProductFormModal({ isOpen, onClose, product, onSave }) {
                       handleAddImageUrl(input.value)
                       input.value = ''
                     }}
-                    isDisabled={imageFiles.length + imageUrls.length + allImages.length >= 3}
+                    isDisabled={imageFiles.length + imageUrls.length + allImages.length >= 1}
                   >
                     <MdAdd />
                   </Button>

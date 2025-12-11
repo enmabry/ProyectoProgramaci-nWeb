@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import {
-  Box, Grid, GridItem, VStack, HStack, Text, Input, Button, Avatar, Badge, Heading, Skeleton, IconButton, Flex
+  Box, Grid, GridItem, VStack, HStack, Text, Input, Button, Avatar, Badge, Heading, Skeleton, IconButton, Flex, useToast, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter
 } from '@chakra-ui/react'
-import { MdSend, MdCheckCircle } from 'react-icons/md'
+import { MdSend, MdCheckCircle, MdClose } from 'react-icons/md'
 import { useSocket } from '../context/SocketContext'
 
 export default function ChatsTab({ token }) {
@@ -11,7 +11,11 @@ export default function ChatsTab({ token }) {
   const [selectedChat, setSelectedChat] = useState(null)
   const [inputValue, setInputValue] = useState('')
   const [loading, setLoading] = useState(true)
+  const [deletingChatId, setDeletingChatId] = useState(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const cancelRef = useRef()
   const messagesEndRef = useRef(null)
+  const toast = useToast()
 
   useEffect(() => {
     loadChats()
@@ -117,12 +121,56 @@ export default function ChatsTab({ token }) {
     }
   }
 
+  const handleAskDeleteChat = (chatId, e) => {
+    e.stopPropagation()
+    setDeletingChatId(chatId)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const handleDeleteChat = async () => {
+    if (!deletingChatId) return
+    
+    try {
+      const res = await fetch(`/api/chats/${deletingChatId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+
+      if (!res.ok) {
+        throw new Error('Error al eliminar conversación')
+      }
+
+      setChats(prev => prev.filter(chat => chat._id !== deletingChatId))
+      
+      if (selectedChat?._id === deletingChatId) {
+        setSelectedChat(null)
+      }
+
+      toast({
+        title: 'Conversación eliminada',
+        status: 'success',
+        duration: 2000,
+        isClosable: true
+      })
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: err.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true
+      })
+    } finally {
+      setIsDeleteDialogOpen(false)
+      setDeletingChatId(null)
+    }
+  }
+
   return (
     <Box>
       <Heading size="md" mb={4}>Conversaciones de Soporte</Heading>
       
       <Grid templateColumns={{ base: '1fr', md: '300px 1fr' }} gap={4} h="600px">
-        {/* Lista de chats */}
         <GridItem>
           <Box bg="white" borderRadius="lg" boxShadow="sm" h="full" overflowY="auto">
             {loading ? (
@@ -150,9 +198,20 @@ export default function ChatsTab({ token }) {
                       <Avatar size="sm" name={chat.user?.username} bg="brand.500" />
                       <Text fontWeight="600" fontSize="sm">{chat.user?.username}</Text>
                     </HStack>
-                    {chat.unreadCount > 0 && (
-                      <Badge colorScheme="red" borderRadius="full">{chat.unreadCount}</Badge>
-                    )}
+                    <HStack spacing={2}>
+                      {chat.unreadCount > 0 && (
+                        <Badge colorScheme="red" borderRadius="full">{chat.unreadCount}</Badge>
+                      )}
+                      <IconButton
+                        icon={<MdClose />}
+                        size="sm"
+                        variant="ghost"
+                        colorScheme="red"
+                        aria-label="Eliminar conversación"
+                        onClick={(e) => handleAskDeleteChat(chat._id, e)}
+                        _hover={{ bg: 'red.50' }}
+                      />
+                    </HStack>
                   </HStack>
                   <Text fontSize="xs" color="gray.600" noOfLines={1}>
                     {chat.messages[chat.messages.length - 1]?.content || 'Sin mensajes'}
@@ -221,6 +280,28 @@ export default function ChatsTab({ token }) {
           </Box>
         </GridItem>
       </Grid>
+
+      {/* Alert Dialog para confirmar eliminación */}
+      <AlertDialog isOpen={isDeleteDialogOpen} leastDestructiveRef={cancelRef} onClose={() => setIsDeleteDialogOpen(false)}>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Eliminar conversación
+            </AlertDialogHeader>
+            <AlertDialogBody>
+              ¿Estás seguro de que deseas eliminar esta conversación? Esta acción no se puede deshacer.
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={() => setIsDeleteDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button colorScheme="red" onClick={handleDeleteChat} ml={3}>
+                Eliminar
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Box>
   )
 }

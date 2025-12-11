@@ -290,15 +290,15 @@ async function buildPayloadFromBody(body, files){
     }
   }
   
-  // Limitar a máximo 3 imágenes
+  // Limitar a máximo 1 imagen
   if (finalImages.length > 0) {
-    payload.images = finalImages.slice(0, 3);
+    payload.images = finalImages.slice(0, 1);
   }
   return payload;
 }
 
 // POST crear producto (solo admin) con subida de imágenes
-router.post('/', authenticateJWT, authorizeRoles('admin'), upload.array('images', 8), async (req, res) => {
+router.post('/', authenticateJWT, authorizeRoles('admin'), upload.array('images', 1), async (req, res) => {
   try {
     const payload = await buildPayloadFromBody(req.body, req.files);
     const product = await Product.create(payload);
@@ -309,7 +309,7 @@ router.post('/', authenticateJWT, authorizeRoles('admin'), upload.array('images'
 });
 
 // PUT actualizar producto (solo admin) con posibilidad de subir nuevas imágenes
-router.put('/:id', authenticateJWT, authorizeRoles('admin'), upload.array('images', 8), async (req, res) => {
+router.put('/:id', authenticateJWT, authorizeRoles('admin'), upload.array('images', 1), async (req, res) => {
   try {
     const payload = await buildPayloadFromBody(req.body, req.files);
 
