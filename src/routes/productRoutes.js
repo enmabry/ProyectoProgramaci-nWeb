@@ -241,7 +241,7 @@ async function buildPayloadFromBody(body, files){
   const uploaded = Array.isArray(files)
     ? files
         .filter(f => f.path && f.filename)
-        .map(f => ({ url: f.path, public_id: f.filename }))
+        .map(f => ({ url: f.path, publicId: f.filename }))
     : [];
 
   // Imágenes a partir de URLs (imageUrls puede ser JSON ["http..",...] o CSV)
@@ -251,14 +251,49 @@ async function buildPayloadFromBody(body, files){
     for (const url of maybeUrls){
       try {
         const r = await cloudinary.uploader.upload(url, { folder: 'products' });
-        uploadedFromUrls.push({ url: r.secure_url, public_id: r.public_id });
+        uploadedFromUrls.push({ url: r.secure_url, publicId: r.public_id });
       } catch { /* ignoramos URLs que fallen */ }
     }
   }
 
-  // Combinar: si hay archivos, usarlos; si no, usar URLs; si ambos, solo archivos
-  const combined = uploaded.length > 0 ? uploaded : uploadedFromUrls;
-  if (combined.length) payload.images = combined;
+  // Combinar imágenes nuevas (archivos + URLs)
+  const allNew = [...uploaded, ...uploadedFromUrls];
+  
+  // Imágenes existentes a preservar
+  const existingImages = toArray(body.existingImages);
+  
+  // Si hay imágenes nuevas, usar solo esas; si no, preservar las existentes
+  let finalImages = [];
+  let imagesToDelete = [];
+  
+  if (allNew.length > 0) {
+    finalImages = allNew;
+  } else if (existingImages && existingImages.length > 0) {
+    // Si no hay nuevas pero hay existentes para preservar, usarlas
+    const product = await Product.findById(req.params?.id);
+    if (product && product.images) {
+      // Detectar imágenes a eliminar (las que no están en existingImages)
+      imagesToDelete = product.images
+        .filter(img => !existingImages.includes(img.publicId))
+        .map(img => img.publicId);
+      
+      // Eliminar las imágenes de Cloudinary
+      for (const publicId of imagesToDelete) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (err) {
+          console.error(`Error eliminando imagen ${publicId}:`, err.message);
+        }
+      }
+      
+      finalImages = product.images.filter(img => existingImages.includes(img.publicId));
+    }
+  }
+  
+  // Limitar a máximo 3 imágenes
+  if (finalImages.length > 0) {
+    payload.images = finalImages.slice(0, 3);
+  }
   return payload;
 }
 
@@ -278,13 +313,10 @@ router.put('/:id', authenticateJWT, authorizeRoles('admin'), upload.array('image
   try {
     const payload = await buildPayloadFromBody(req.body, req.files);
 
-    // Manejar imágenes: si hay nuevas imágenes, reemplazar las antiguas
-    // Si NO hay nuevas imágenes, preservar las existentes
+    // Si payload.images está vacío, no incluirlo para que no sobrescriba
     if (!payload.images || payload.images.length === 0) {
-      // No hay nuevas imágenes, no cambiar las existentes
       delete payload.images;
     }
-    // Si hay nuevas imágenes (en payload.images), reemplazar las antiguas
 
     const product = await Product.findByIdAndUpdate(
       req.params.id,

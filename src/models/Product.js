@@ -10,7 +10,7 @@ const ProductSchema = new mongoose.Schema({
   price:      { type: Number, required: true, min: 0 }, // Precio del producto, requerido y no negativo
   compareAtPrice: { type: Number }, // Precio de comparación opcional para mostrar descuentos
   images:     { 
-    type: [{ url: String, public_id: String }], 
+    type: [{ url: String, publicId: String }], 
     default: [] 
   }, // Array de imágenes del producto (Cloudinary)
   categories: { type: [String], default: [] }, // Categorías del producto, ej: ["Interior","Suculentas"]
