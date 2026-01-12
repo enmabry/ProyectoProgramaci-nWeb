@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react'
-import { Box, Container, Flex, Heading, SimpleGrid, Select, Input, Button, Slider, SliderTrack, SliderFilledTrack, SliderThumb, Text, Checkbox, CheckboxGroup, Stack, Skeleton } from '@chakra-ui/react'
+import { Box, Container, Flex, Heading, SimpleGrid, Select, Input, Button, Slider, SliderTrack, SliderFilledTrack, SliderThumb, Text, Checkbox, CheckboxGroup, Stack, Skeleton, useToast } from '@chakra-ui/react'
 import { useSearchParams, Link } from 'react-router-dom'
 import NavbarGlass from '../components/NavbarGlass'
+import { useCart } from '../context/CartContext'
 import '../styles/catalog.css'
 
 function formatCurrency(value){
@@ -13,6 +14,21 @@ function formatCurrency(value){
 }
 
 function ProductTile({ p }){
+  const { addToCart } = useCart()
+  const toast = useToast()
+  
+  const handleAddToCart = (e) => {
+    e.preventDefault()
+    addToCart(p)
+    toast({
+      title: 'Agregado al carrito',
+      description: `${p.name} fue añadido a tu carrito`,
+      status: 'success',
+      duration: 2000,
+      isClosable: true
+    })
+  }
+
   return (
     <Box 
       as={Link} 
@@ -27,7 +43,7 @@ function ProductTile({ p }){
       <Box className="catalog-card__body">
         <Heading as="h3" className="catalog-card__title" title={p.name}>{p.name}</Heading>
         <Text className="catalog-card__price">{formatCurrency(p.price)}</Text>
-        <Button size="sm" w="full" mt={2}>Añadir</Button>
+        <Button size="sm" w="full" mt={2} onClick={handleAddToCart}>Añadir al carrito</Button>
       </Box>
     </Box>
   )

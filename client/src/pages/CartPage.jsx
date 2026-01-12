@@ -1,9 +1,11 @@
-import React from 'react'
-import { Box, Container, Heading, Text, Button, HStack, VStack, Image, Grid, GridItem, IconButton, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Divider, Flex, useToast } from '@chakra-ui/react'
+import React, { useState } from 'react'
+import { Box, Container, Heading, Text, Button, HStack, VStack, Image, Grid, GridItem, IconButton, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Divider, Flex, useToast, FormControl, FormLabel, Input, Select, useDisclosure } from '@chakra-ui/react'
 import { Link, useNavigate } from 'react-router-dom'
 import { MdDelete, MdShoppingCart } from 'react-icons/md'
 import NavbarGlass from '../components/NavbarGlass'
+import PaymentModal from '../components/PaymentModal'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
 import '../styles/cart.css'
 
 function formatCurrency(value){
@@ -74,50 +76,123 @@ function CartItem({ item }){
 
 export default function CartPage(){
   const { items, clearCart, total, itemCount } = useCart()
+  const { user, token } = useAuth()
   const navigate = useNavigate()
   const toast = useToast()
+  const { isOpen, onOpen, onClose } = useDisclosure()
   const [processingPayment, setProcessingPayment] = React.useState(false)
 
-  const handleCheckout = async () => {
+  // Estado formulario de envío
+  const [shippingForm, setShippingForm] = useState({
+    fullName: user?.username || '',
+    phone: '',
+    address: '',
+    city: '',
+    postalCode: '',
+    country: 'Colombia'
+  })
+
+  const handleShippingChange = (e) => {
+    const { name, value } = e.target
+    setShippingForm(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleCheckout = () => {
+    // Validar autenticación
+    if (!user || !token) {
+      toast({
+        title: 'Error',
+        description: 'Debes estar autenticado para realizar una compra',
+        status: 'error',
+        duration: 3000,
+        isClosable: true
+      })
+      navigate('/login')
+      return
+    }
+
+    // Validar formulario de envío
+    if (!shippingForm.fullName || !shippingForm.phone || !shippingForm.address || !shippingForm.city || !shippingForm.postalCode) {
+      toast({
+        title: 'Error',
+        description: 'Por favor completa todos los campos de envío',
+        status: 'error',
+        duration: 3000,
+        isClosable: true
+      })
+      return
+    }
+
+    // Si todo es válido, abrir el modal de pago
+    onOpen()
+  }
+
+  const handlePaymentConfirm = async (cardData) => {
     try {
       setProcessingPayment(true)
       
-      // Preparar items para enviar al backend
-      const checkoutItems = items.map(item => ({
-        productId: item._id,
-        quantity: item.quantity
-      }))
+      // Construir mutation GraphQL
+      const itemsInput = items.map(item => 
+        `{productId: "${item._id}", quantity: ${item.quantity}}`
+      ).join(',')
 
-      // Llamar al endpoint de checkout
-      const response = await fetch('/api/orders/checkout', {
+      const shippingInput = `{
+        fullName: "${shippingForm.fullName.replace(/"/g, '\\"')}", 
+        phone: "${shippingForm.phone}", 
+        address: "${shippingForm.address.replace(/"/g, '\\"')}", 
+        city: "${shippingForm.city}", 
+        postalCode: "${shippingForm.postalCode}", 
+        country: "${shippingForm.country}"
+      }`
+
+      const mutation = `mutation {
+        createOrder(
+          items: [${itemsInput}],
+          shippingAddress: ${shippingInput},
+          paymentMethod: "credit_card",
+          notes: "Tarjeta: ${cardData.cardType.toUpperCase()} •••• ${cardData.cardNumber.slice(-4)}"
+        ) {
+          id
+          total
+          status
+        }
+      }`
+
+      const res = await fetch('/graphql', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ items: checkoutItems })
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query: mutation })
       })
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Error en el pago')
+      if (!res.ok) throw new Error('Error en la petición')
+      
+      const data = await res.json()
+      
+      if (data.errors) {
+        throw new Error(data.errors[0].message)
       }
 
-      const data = await response.json()
+      const order = data.data.createOrder
       
       toast({
-        title: '¡Pago procesado!',
-        description: `Orden #${data.orderId} creada exitosamente. Stock actualizado.`,
+        title: '¡Orden creada exitosamente!',
+        description: `Orden #${order.id.substring(0, 8)}... por ${formatCurrency(order.total)}`,
         status: 'success',
         duration: 5000,
         isClosable: true,
         position: 'top-right'
       })
 
-      // Limpiar carrito y redirigir
+      // Cerrar modal, limpiar carrito y redirigir
+      onClose()
       clearCart()
-      navigate('/')
+      navigate('/profile')
     } catch (err) {
       toast({
-        title: 'Error en el pago',
+        title: 'Error al crear la orden',
         description: err.message,
         status: 'error',
         duration: 5000,
@@ -159,9 +234,93 @@ export default function CartPage(){
           </Flex>
 
           <Grid templateColumns={{ base:'1fr', lg:'2fr 1fr' }} gap={8}>
-            <VStack spacing={4} align="stretch">
-              <Text fontSize="sm" color="gray.600">{itemCount} {itemCount === 1 ? 'producto' : 'productos'} en tu carrito</Text>
-              {items.map(item => <CartItem key={item._id} item={item} />)}
+            {/* Productos y Formulario */}
+            <VStack spacing={6} align="stretch">
+              {/* Productos */}
+              <Box>
+                <Text fontSize="sm" color="gray.600" mb={3}>{itemCount} {itemCount === 1 ? 'producto' : 'productos'} en tu carrito</Text>
+                <VStack spacing={4}>
+                  {items.map(item => <CartItem key={item._id} item={item} />)}
+                </VStack>
+              </Box>
+
+              <Divider />
+
+              {/* Formulario de envío */}
+              <Box bg="white" p={6} borderRadius="lg" boxShadow="sm">
+                <Heading size="md" mb={4}>Dirección de envío</Heading>
+                <VStack spacing={4}>
+                  <FormControl>
+                    <FormLabel fontSize="sm">Nombre completo</FormLabel>
+                    <Input 
+                      name="fullName"
+                      value={shippingForm.fullName}
+                      onChange={handleShippingChange}
+                      placeholder="Juan Pérez"
+                      size="sm"
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel fontSize="sm">Teléfono</FormLabel>
+                    <Input 
+                      name="phone"
+                      value={shippingForm.phone}
+                      onChange={handleShippingChange}
+                      placeholder="+57 301 234 5678"
+                      size="sm"
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel fontSize="sm">Dirección</FormLabel>
+                    <Input 
+                      name="address"
+                      value={shippingForm.address}
+                      onChange={handleShippingChange}
+                      placeholder="Cra. 5 # 10-50, Apartamento 501"
+                      size="sm"
+                    />
+                  </FormControl>
+
+                  <Grid templateColumns="1fr 1fr" gap={4} w="100%">
+                    <FormControl>
+                      <FormLabel fontSize="sm">Ciudad</FormLabel>
+                      <Input 
+                        name="city"
+                        value={shippingForm.city}
+                        onChange={handleShippingChange}
+                        placeholder="Bogotá"
+                        size="sm"
+                      />
+                    </FormControl>
+
+                    <FormControl>
+                      <FormLabel fontSize="sm">Código postal</FormLabel>
+                      <Input 
+                        name="postalCode"
+                        value={shippingForm.postalCode}
+                        onChange={handleShippingChange}
+                        placeholder="110221"
+                        size="sm"
+                      />
+                    </FormControl>
+                  </Grid>
+
+                  <FormControl>
+                    <FormLabel fontSize="sm">País</FormLabel>
+                    <Select 
+                      name="country"
+                      value={shippingForm.country}
+                      onChange={handleShippingChange}
+                      size="sm"
+                    >
+                      <option value="Colombia">Colombia</option>
+                      <option value="Otro">Otro país</option>
+                    </Select>
+                  </FormControl>
+                </VStack>
+              </Box>
             </VStack>
 
             {/* Resumen */}
@@ -188,9 +347,9 @@ export default function CartPage(){
                   mt={4}
                   onClick={handleCheckout}
                   isLoading={processingPayment}
-                  loadingText="Procesando pago..."
+                  loadingText="Creando orden..."
                 >
-                  Proceder al pago
+                  Finalizar compra
                 </Button>
                 <Button as={Link} to="/catalog" variant="outline" colorScheme="brand" size="md" w="full">
                   Seguir comprando
@@ -199,6 +358,15 @@ export default function CartPage(){
             </Box>
           </Grid>
         </Container>
+
+        {/* Modal de Pago */}
+        <PaymentModal 
+          isOpen={isOpen} 
+          onClose={onClose} 
+          total={total} 
+          onConfirm={handlePaymentConfirm}
+          isLoading={processingPayment}
+        />
       </Box>
     </Box>
   )

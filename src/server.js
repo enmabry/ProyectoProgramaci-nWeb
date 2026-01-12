@@ -9,6 +9,10 @@ const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpecs = require('./config/swagger');
+const { ApolloServer } = require('apollo-server-express');
+const typeDefs = require('./graphql/schema');
+const resolvers = require('./graphql/resolvers');
+const { dateTimeScalar } = require('./graphql/scalars');
 
 const { MONGO_URI, PORT = 3000, JWT_SECRET = 'dev' } = process.env;
 
@@ -35,12 +39,49 @@ const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/orders', orderRoutes);
 
+// --- GraphQL Apollo Server ---
+const startApolloServer = async () => {
+  const apolloServer = new ApolloServer({
+    typeDefs,
+    resolvers: {
+      DateTime: dateTimeScalar,
+      ...resolvers
+    },
+    context: ({ req }) => {
+      // Obtener token del header
+      const token = req.headers.authorization?.split('Bearer ')[1];
+      let user = null;
+      if (token) {
+        try {
+          user = jwt.verify(token, JWT_SECRET);
+        } catch (err) {
+          console.log('Token inválido en GraphQL');
+        }
+      }
+      return { user, token };
+    }
+  });
+
+  await apolloServer.start();
+  
+  // Aplicar Apollo middleware sin conflicto con body-parser
+  apolloServer.applyMiddleware({ 
+    app,
+    bodyParserConfig: false  // Evitar que Apollo parsee el body
+  });
+  
+  console.log(`🚀 GraphQL disponible en: http://localhost:${PORT}${apolloServer.graphqlPath}`);
+};
+
+startApolloServer();
 
 // --- Rutas de prueba ---
 app.get('/api/health', (req, res) => res.json({ ok: true }));

@@ -7,7 +7,7 @@ const nodemailer = require('nodemailer');
 
 const router = Router();
 const sign = (u) => jwt.sign(
-  { id: u._id, username: u.username, role: u.role },
+  { id: u._id, username: u.username, email: u.email, role: u.role },
   process.env.JWT_SECRET,
   { expiresIn: '7d' }
 );
@@ -50,7 +50,7 @@ router.post('/register', authLimiter, async (req,res)=>{
     const exists = await User.findOne({ $or: [{email}, {username}] });
     if (exists) return res.status(400).json({ error: 'Usuario o email ya registrado', code: 'USER_EXISTS' });
     const user = await User.create({ username, email, password, role: role || 'user' });
-    res.json({ token: sign(user), user: { id:user._id, username:user.username, role:user.role }});
+    res.json({ token: sign(user), user: { id:user._id, username:user.username, email:user.email, role:user.role }});
   }catch(e){ res.status(400).json({ error: e.message, code: 'REGISTER_ERROR' }); }
 });
 
@@ -95,7 +95,7 @@ router.post('/login', authLimiter, async (req,res)=>{
     // Login exitoso: resetear contador/bloqueo si aplica
     try { await user.resetLoginAttempts(); } catch(_){}
 
-    res.json({ token: sign(user), user: { id:user._id, username:user.username, role:user.role }});
+    res.json({ token: sign(user), user: { id:user._id, username:user.username, email:user.email, role:user.role }});
   }catch(e){ res.status(400).json({ error: e.message, code: 'LOGIN_ERROR' }); }
 });
 
