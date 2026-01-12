@@ -214,7 +214,7 @@ export default function OrdersTab() {
                   </Td>
                   <Td>
                     <Text fontSize="xs" color="gray.600">
-                      {new Date(order.createdAt).toLocaleDateString('es-CO')}
+                      {order.createdAt ? new Date(order.createdAt).toLocaleDateString('es-CO') : '—'}
                     </Text>
                   </Td>
                   <Td textAlign="right">
@@ -288,7 +288,7 @@ export default function OrdersTab() {
 
               <Box w="100%">
                 <Text fontSize="sm" color="gray.600">Fecha</Text>
-                <Text fontSize="sm" fontWeight="600">{new Date(selectedOrder.createdAt).toLocaleString('es-CO')}</Text>
+                <Text fontSize="sm" fontWeight="600">{selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleString('es-CO') : '—'}</Text>
               </Box>
 
               <Box w="100%" borderTop="1px solid #e2e8f0" pt={4}>

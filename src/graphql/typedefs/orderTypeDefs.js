@@ -1,6 +1,8 @@
 const { gql } = require('apollo-server-express');
 
 const orderTypeDefs = gql`
+  scalar DateTime
+
   type OrderItem {
     productId: ID!
     productName: String!
@@ -31,12 +33,12 @@ const orderTypeDefs = gql`
     paymentMethod: String!
     paymentStatus: String!
     notes: String
-    confirmedAt: String
-    shippedAt: String
-    deliveredAt: String
-    cancelledAt: String
-    createdAt: String
-    updatedAt: String
+    confirmedAt: DateTime
+    shippedAt: DateTime
+    deliveredAt: DateTime
+    cancelledAt: DateTime
+    createdAt: DateTime
+    updatedAt: DateTime
   }
 
   input OrderItemInput {

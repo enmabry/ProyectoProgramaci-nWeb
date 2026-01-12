@@ -100,7 +100,7 @@ OrderSchema.methods.updateStatus = function(newStatus) {
     this.cancelledAt = new Date();
   }
 
-  return this.save();
+  return this;
 };
 
 // Método para calcular el total automáticamente

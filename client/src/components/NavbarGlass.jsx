@@ -80,6 +80,11 @@ export default function NavbarGlass(){
                   <Text fontSize="sm" fontWeight="semibold">{user?.username}</Text>
                   <Text fontSize="xs" color="gray.500">{user?.role}</Text>
                 </Box>
+                {!isAdmin && (
+                  <MenuItem as={Link} to="/profile">
+                    Mi Perfil y Pedidos
+                  </MenuItem>
+                )}
                 <MenuItem onClick={logout}>Salir</MenuItem>
               </MenuList>
             </Menu>

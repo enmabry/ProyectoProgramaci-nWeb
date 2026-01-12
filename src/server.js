@@ -12,6 +12,7 @@ const swaggerSpecs = require('./config/swagger');
 const { ApolloServer } = require('apollo-server-express');
 const typeDefs = require('./graphql/schema');
 const resolvers = require('./graphql/resolvers');
+const { dateTimeScalar } = require('./graphql/scalars');
 
 const { MONGO_URI, PORT = 3000, JWT_SECRET = 'dev' } = process.env;
 
@@ -50,7 +51,10 @@ app.use('/api/orders', orderRoutes);
 const startApolloServer = async () => {
   const apolloServer = new ApolloServer({
     typeDefs,
-    resolvers,
+    resolvers: {
+      DateTime: dateTimeScalar,
+      ...resolvers
+    },
     context: ({ req }) => {
       // Obtener token del header
       const token = req.headers.authorization?.split('Bearer ')[1];
