@@ -7,6 +7,7 @@ import ProductFormModal from '../components/ProductFormModal'
 import ConfirmDialog from '../components/ConfirmDialog'
 import ChatsTab from '../components/ChatsTab'
 import UsersTab from '../components/UsersTab'
+import OrdersTab from '../components/OrdersTab'
 import '../styles/admin.css'
 
 function formatCurrency(value){
@@ -223,17 +224,6 @@ function ProductsTab(){
         onConfirm={handleDelete}
         accent="red"
       />
-    </Box>
-  )
-}
-
-function OrdersTab(){
-  return (
-    <Box>
-      <Heading size="md" mb={4}>Pedidos</Heading>
-      <Box bg="white" p={6} borderRadius="lg" boxShadow="sm">
-        <Text color="gray.500">Historial de pedidos próximamente...</Text>
-      </Box>
     </Box>
   )
 }
